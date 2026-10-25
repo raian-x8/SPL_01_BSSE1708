@@ -3,24 +3,37 @@
 
 #include <fstream>
 
+#include <string>
+
+using namespace std;
+
 int main()
 {
-    std::cout << "================================\n";
-    std::cout << "        CloneScope v0.1\n";
-    std::cout << "================================\n";
-    std::cout << "Code Clone Analysis Tool\n";
-    std::cout << "Status: Development Started\n";
+    cout << "================================\n";
+    cout << "        CloneScope v0.1\n";
+    cout << "================================\n";
+    cout << "Code Clone Analysis Tool\n";
+    cout << "Status: Development Started\n";
 
     // Open the sample C source file
-    std::ifstream inputFile("samples/hello.c");
+    ifstream inputFile("samples/hello.c");
 
     // Check whether the file opened successfully
     if (!inputFile.is_open())
     {
-        std::cerr << "Error: Could not open source file.\n";
+        cerr << "Error: Could not open source file.\n";
         return 1;
     }
 
-    std::cout << "Source file opened successfully!\n";
+    cout << "Source file opened successfully!\n";
+
+    // Store one line of source code
+    string line;
+
+    // Read and display each line
+    while (getline(inputFile, line))
+    {
+        cout << line << '\n';
+    }
     return 0;
 }
