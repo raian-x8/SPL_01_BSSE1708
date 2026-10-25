@@ -15,8 +15,15 @@ int main()
     cout << "Code Clone Analysis Tool\n";
     cout << "Status: Development Started\n";
 
-    // Open the sample C source file
-    ifstream inputFile("samples/hello.c");
+    // Read a user-selected C/C++ source file
+    // Ask the user for a source file path
+    string filePath;
+
+    cout << "Enter source file path: ";
+    getline(cin, filePath);
+
+    // Open the selected source file
+    ifstream inputFile(filePath);
 
     // Check whether the file opened successfully
     if (!inputFile.is_open())
