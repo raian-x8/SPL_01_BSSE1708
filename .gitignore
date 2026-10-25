@@ -1,0 +1,13 @@
+# C++ compiled files
+*.exe
+*.o
+*.obj
+
+# CMake build output
+build/
+CMakeFiles/
+CMakeCache.txt
+
+# Temporary files
+*.tmp
+*.log
