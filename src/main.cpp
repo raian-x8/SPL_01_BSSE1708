@@ -36,7 +36,12 @@ int main()
         // Visit each entry directly inside the folder
         for (const auto &entry : fs::directory_iterator(sourcePath))
         {
-            cout << entry.path() << '\n';
+            if (entry.is_regular_file() &&
+                (entry.path().extension() == ".c" ||
+                 entry.path().extension() == ".cpp"))
+            {
+                cout << entry.path() << '\n';
+            }
         }
 
         return 0;
