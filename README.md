@@ -32,6 +32,26 @@ It aims to provide explainable evidence for instructors rather than automaticall
 
 ## Current Status
 
-**Development Phase:** Repository foundation and initial setup.
+**Development Phase:** Source Input Module Completed (Basic Version)
 
-The clone detection engine has not yet been implemented.
+### Implemented Features
+
+- C++17 command-line application.
+- User-selected C/C++ source-file input.
+- Local folder input using `std::filesystem`.
+- Directory scanning using `directory_iterator`.
+- Filtering of regular `.c` and `.cpp` files.
+- Opening and reading multiple source files using `ifstream` and `getline()`.
+- Basic file-opening error handling.
+- Manual testing of valid and invalid inputs.
+
+### Current Limitations
+
+- Directory scanning is non-recursive.
+- File-extension filtering supports lowercase `.c` and `.cpp`.
+- Source code is read and displayed but not yet analyzed.
+- Clone detection and stylometric analysis are not yet implemented.
+
+### Next Development Milestone
+
+Source code preprocessing, tokenization, function/block representation, and initial Type-1 and Type-2 clone candidate tagging.
