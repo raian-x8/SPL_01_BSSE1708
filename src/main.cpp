@@ -56,13 +56,19 @@ int main()
                 }
 
                 cout << "Source file opened successfully!\n";
-                // Read the discovered source file line by line
-                string line;
 
-                while (getline(sourceFile, line))
-                {
-                    cout << line << '\n';
-                }
+                // Read the complete discovered source file
+                std::ostringstream buffer;
+                buffer << sourceFile.rdbuf();
+
+                std::string sourceCode = buffer.str();
+
+                // Remove comments from this source file
+                std::string cleanedCode = removeComments(sourceCode);
+
+                // Display the processed source code
+                cout << "Preprocessed source code:\n";
+                cout << cleanedCode << '\n';
             }
         }
 
