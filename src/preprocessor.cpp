@@ -11,8 +11,8 @@ enum class ScanState
     CharLiteral
 };
 
-// Temporary implementation.
-// The actual comment-removal algorithm will be added next.
+// Basic comment removal using a lexical state machine.
+// Preserves source positions for supported comment cases.
 
 std::string removeComments(const std::string &source)
 {
@@ -27,7 +27,105 @@ std::string removeComments(const std::string &source)
 
         if (state == ScanState::Normal)
         {
-            result += current;
+            if (current == '/' && i + 1 < source.size() &&
+                source[i + 1] == '/')
+            {
+                state = ScanState::LineComment;
+                result += "  ";
+                ++i;
+            }
+
+            else if (current == '/' && i + 1 < source.size() &&
+                     source[i + 1] == '*')
+            {
+                state = ScanState::BlockComment;
+                result += "  ";
+                ++i;
+            }
+
+            else if (current == '"')
+            {
+                state = ScanState::StringLiteral;
+                result += current;
+            }
+            else if (current == '\'')
+            {
+                state = ScanState::CharLiteral;
+                result += current;
+            }
+            else
+            {
+                result += current;
+            }
+        }
+        else if (state == ScanState::LineComment)
+        {
+            if (current == '\n')
+            {
+                result += '\n';
+                state = ScanState::Normal;
+            }
+            else
+            {
+                result += ' ';
+            }
+        }
+
+        else if (state == ScanState::BlockComment)
+        {
+            if (current == '*' && i + 1 < source.size() &&
+                source[i + 1] == '/')
+            {
+                result += "  ";
+                state = ScanState::Normal;
+                ++i;
+            }
+            else if (current == '\n')
+            {
+                result += '\n';
+            }
+            else
+            {
+                result += ' ';
+            }
+        }
+
+        else if (state == ScanState::StringLiteral)
+        {
+            if (current == '\\' && i + 1 < source.size())
+            {
+                result += current;
+                result += source[i + 1];
+                ++i;
+            }
+            else if (current == '"')
+            {
+                result += current;
+                state = ScanState::Normal;
+            }
+            else
+            {
+                result += current;
+            }
+        }
+
+        else if (state == ScanState::CharLiteral)
+        {
+            if (current == '\\' && i + 1 < source.size())
+            {
+                result += current;
+                result += source[i + 1];
+                ++i;
+            }
+            else if (current == '\'')
+            {
+                result += current;
+                state = ScanState::Normal;
+            }
+            else
+            {
+                result += current;
+            }
         }
     }
 
