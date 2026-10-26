@@ -41,6 +41,24 @@ int main()
                  entry.path().extension() == ".cpp"))
             {
                 cout << entry.path() << '\n';
+                // Open the discovered source file
+                ifstream sourceFile(entry.path());
+
+                // Handle a file-opening failure
+                if (!sourceFile.is_open())
+                {
+                    cerr << "Error: Could not open " << entry.path() << '\n';
+                    continue;
+                }
+
+                cout << "Source file opened successfully!\n";
+                // Read the discovered source file line by line
+                string line;
+
+                while (getline(sourceFile, line))
+                {
+                    cout << line << '\n';
+                }
             }
         }
 
