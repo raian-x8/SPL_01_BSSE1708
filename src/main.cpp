@@ -32,7 +32,13 @@ int main()
     if (fs::is_directory(sourcePath))
     {
         cout << "Folder detected successfully!\n";
-        cout << "Folder scanning will be added next.\n";
+
+        // Visit each entry directly inside the folder
+        for (const auto &entry : fs::directory_iterator(sourcePath))
+        {
+            cout << entry.path() << '\n';
+        }
+
         return 0;
     }
 
