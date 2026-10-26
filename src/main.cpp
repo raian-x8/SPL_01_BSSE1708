@@ -28,6 +28,14 @@ int main()
 
     fs::path sourcePath(filePath);
 
+    // Check whether the input path is a directory
+    if (fs::is_directory(sourcePath))
+    {
+        cout << "Folder detected successfully!\n";
+        cout << "Folder scanning will be added next.\n";
+        return 0;
+    }
+
     // Open the selected source file
     ifstream inputFile(sourcePath);
 
