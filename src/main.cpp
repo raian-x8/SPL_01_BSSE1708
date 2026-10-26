@@ -7,6 +7,10 @@
 
 #include <filesystem>
 
+#include <sstream>
+
+#include "preprocessor.hpp"
+
 using namespace std;
 
 namespace fs = std::filesystem;
@@ -77,13 +81,18 @@ int main()
 
     cout << "Source file opened successfully!\n";
 
-    // Store one line of source code
-    string line;
+    // Read the complete source file into memory
+    std::ostringstream buffer;
+    buffer << inputFile.rdbuf();
 
-    // Read and display each line
-    while (getline(inputFile, line))
-    {
-        cout << line << '\n';
-    }
+    std::string sourceCode = buffer.str();
+
+    // Remove comments from the source code
+    std::string cleanedCode = removeComments(sourceCode);
+
+    // Display the preprocessed source code
+    cout << "Preprocessed source code:\n";
+    cout << cleanedCode;
+
     return 0;
 }
