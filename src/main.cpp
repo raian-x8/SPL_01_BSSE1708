@@ -5,7 +5,11 @@
 
 #include <string>
 
+#include <filesystem>
+
 using namespace std;
+
+namespace fs = std::filesystem;
 
 int main()
 {
@@ -22,8 +26,10 @@ int main()
     cout << "Enter source file path: ";
     getline(cin, filePath);
 
+    fs::path sourcePath(filePath);
+
     // Open the selected source file
-    ifstream inputFile(filePath);
+    ifstream inputFile(sourcePath);
 
     // Check whether the file opened successfully
     if (!inputFile.is_open())
