@@ -2,11 +2,20 @@
 
 #include <cctype>
 
-// Scans source code one character at a time.
-// Token recognition will be added incrementally.
+#include <unordered_set>
+
+// Converts C/C++ source text into tokens.
+// Currently recognizes identifiers and a subset of keywords.
+
 std::vector<Token> tokenize(const std::string &source)
 {
     std::vector<Token> tokens;
+
+    // Common C/C++ keywords; the list will be expanded later.
+    static const std::unordered_set<std::string> keywords = {
+        "int", "float", "double", "char", "void",
+        "if", "else", "for", "while", "return",
+        "bool", "const", "class", "struct"};
 
     // Track the current character and source location.
     std::size_t index = 0;
@@ -39,11 +48,21 @@ std::vector<Token> tokenize(const std::string &source)
                 ++index;
                 ++column;
             }
+            // Extract the complete identifier-shaped word.
+            std::string lexeme = source.substr(start, index - start);
 
-            // Save the recognized text and its starting location.
+            // Distinguish reserved keywords from ordinary identifiers.
+            TokenType type = TokenType::Identifier;
+
+            if (keywords.find(lexeme) != keywords.end())
+            {
+                type = TokenType::Keyword;
+            }
+
+            // Preserve the token text and its starting location.
             tokens.push_back(Token{
-                TokenType::Identifier,
-                source.substr(start, index - start),
+                type,
+                lexeme,
                 line,
                 startColumn});
 
