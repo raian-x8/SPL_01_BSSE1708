@@ -6,7 +6,7 @@
 
 // Converts C/C++ source text into tokens.
 // Currently recognizes identifiers, selected keywords,
-// and basic decimal numeric literals.
+// basic decimal numeric literals, and structural punctuation.
 
 std::vector<Token> tokenize(const std::string &source)
 {
@@ -17,6 +17,9 @@ std::vector<Token> tokenize(const std::string &source)
         "int", "float", "double", "char", "void",
         "if", "else", "for", "while", "return",
         "bool", "const", "class", "struct"};
+
+    // Single-character structural punctuation supported by the tokenizer.
+    static const std::string punctuation = "(){}[],;";
 
     // Track the current character and source location.
     std::size_t index = 0;
@@ -124,6 +127,22 @@ std::vector<Token> tokenize(const std::string &source)
                 source.substr(start, index - start),
                 line,
                 startColumn});
+
+            continue;
+        }
+
+        // Recognize single-character structural punctuation.
+        if (punctuation.find(current) != std::string::npos)
+        {
+            // Store the punctuation and its source location.
+            tokens.push_back(Token{
+                TokenType::Punctuation,
+                source.substr(index, 1),
+                line,
+                column});
+
+            ++index;
+            ++column;
 
             continue;
         }
