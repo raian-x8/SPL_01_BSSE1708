@@ -7,7 +7,7 @@
 // Converts C/C++ source text into tokens.
 // Currently recognizes identifiers, selected keywords,
 // basic decimal numeric literals, structural punctuation,
-// and selected single-character operators.
+// and selected single- and two-character operators.
 
 std::vector<Token> tokenize(const std::string &source)
 {
@@ -22,15 +22,17 @@ std::vector<Token> tokenize(const std::string &source)
     // Single-character structural punctuation supported by the tokenizer.
     static const std::string punctuation = "(){}[],;";
 
-    // Basic single-character operators.
-    // Multi-character operators will be handled in a later step.
-    static const std::string singleCharOperators = "+-*/%&=";
+    // Common single-character operators.
+    // Used when no supported two-character operator matches.
+    static const std::string singleCharOperators = "+-*/%&=!<>|^~";
 
-    // Supported two-character operators, including compound assignments.
+    // Supported two-character operators.
     // Checked before single-character operators to preserve longest matches.
     static const std::unordered_set<std::string> twoCharOperators = {
         "==", "++", "--",
-        "+=", "-=", "*=", "/="};
+        "+=", "-=", "*=", "/=",
+        "%=", "&=", "|=", "^=",
+        "!=", "<=", ">=", "&&", "||"};
 
     // Track the current character and source location.
     std::size_t index = 0;

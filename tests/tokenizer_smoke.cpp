@@ -85,8 +85,9 @@ int main()
     // Verify all currently supported single-character operators.
     const std::string expectedOperators = "+-*/%&=";
 
+    // Separate operators to avoid forming compound assignments.
     const std::vector<Token> operatorTokens =
-        tokenize(expectedOperators);
+        tokenize("+ - * / % & =");
 
     assert(operatorTokens.size() == expectedOperators.size());
 
@@ -99,7 +100,7 @@ int main()
                expectedOperators.substr(i, 1));
 
         assert(operatorTokens[i].line == 1);
-        assert(operatorTokens[i].column == i + 1);
+        assert(operatorTokens[i].column == 2 * i + 1);
     }
 
     // Verify supported compound-assignment operators.
@@ -138,6 +139,64 @@ int main()
 
         assert(twoCharTokens[i].line == 1);
         assert(twoCharTokens[i].column == 3 * i + 1);
+    }
+
+    // Verify comparison and logical operators.
+    const std::vector<Token> logicalTokens =
+        tokenize("!= <= >= && ||");
+
+    const std::vector<std::string> expectedLogical = {
+        "!=", "<=", ">=", "&&", "||"};
+
+    assert(logicalTokens.size() == expectedLogical.size());
+
+    // Verify each operator's text, category, and position.
+    for (std::size_t i = 0; i < expectedLogical.size(); ++i)
+    {
+        assert(logicalTokens[i].lexeme == expectedLogical[i]);
+        assert(logicalTokens[i].type == TokenType::Operator);
+
+        assert(logicalTokens[i].line == 1);
+        assert(logicalTokens[i].column == 3 * i + 1);
+    }
+
+    // Verify newly supported single-character operators.
+    const std::string additionalOperators = "!<>|^~";
+
+    const std::vector<Token> additionalTokens =
+        tokenize(additionalOperators);
+
+    assert(additionalTokens.size() == additionalOperators.size());
+
+    // Verify each operator's type, text, and source position.
+    for (std::size_t i = 0; i < additionalOperators.size(); ++i)
+    {
+        assert(additionalTokens[i].type == TokenType::Operator);
+
+        assert(additionalTokens[i].lexeme ==
+               additionalOperators.substr(i, 1));
+
+        assert(additionalTokens[i].line == 1);
+        assert(additionalTokens[i].column == i + 1);
+    }
+
+    // Verify the remaining supported compound-assignment operators.
+    const std::vector<Token> extraCompoundTokens =
+        tokenize("%= &= |= ^=");
+
+    const std::vector<std::string> expectedExtraCompound = {
+        "%=", "&=", "|=", "^="};
+
+    assert(extraCompoundTokens.size() == expectedExtraCompound.size());
+
+    // Verify each operator's lexeme, category, and source position.
+    for (std::size_t i = 0; i < expectedExtraCompound.size(); ++i)
+    {
+        assert(extraCompoundTokens[i].lexeme == expectedExtraCompound[i]);
+        assert(extraCompoundTokens[i].type == TokenType::Operator);
+
+        assert(extraCompoundTokens[i].line == 1);
+        assert(extraCompoundTokens[i].column == 3 * i + 1);
     }
 
     std::cout << "Tokenizer keyword, identifier, number, punctuation, and operator smoke tests passed.\n";
