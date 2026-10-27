@@ -15,9 +15,24 @@
 
 #include "tokenizer.hpp"
 
+#include "function_region.hpp"
+
+#include "type1_clone.hpp"
+
+#include "type1_report.hpp"
+
+#include <vector>
+
 using namespace std;
 
 namespace fs = std::filesystem;
+
+struct AnalyzedSourceFile
+{
+    fs::path path;
+    std::vector<Token> tokens;
+    std::vector<CodeRegion> functionRegions;
+};
 
 int runCloneScope()
 {
@@ -40,6 +55,8 @@ int runCloneScope()
     if (fs::is_directory(sourcePath))
     {
         cout << "Folder detected successfully!\n";
+
+        std::vector<AnalyzedSourceFile> analyzedFiles;
 
         // Visit each entry directly inside the folder
         for (const auto &entry : fs::directory_iterator(sourcePath))
@@ -79,8 +96,62 @@ int runCloneScope()
 
                 // Display the total token count for this file.
                 cout << "Total tokens: " << tokens.size() << '\n';
+
+                std::vector<CodeRegion> functionRegions =
+                    findFunctionBodyRegions(tokens);
+
+                cout << "Supported function-body regions: "
+                     << functionRegions.size() << '\n';
+
+                analyzedFiles.push_back(
+                    AnalyzedSourceFile{entry.path(), tokens, functionRegions});
             }
         }
+
+        cout << "\nAnalyzed source files stored: "
+             << analyzedFiles.size() << '\n';
+
+        std::size_t filePairCount = 0;
+
+        for (std::size_t i = 0; i < analyzedFiles.size(); ++i)
+        {
+            for (std::size_t j = i + 1; j < analyzedFiles.size(); ++j)
+            {
+                const AnalyzedSourceFile &first = analyzedFiles[i];
+                const AnalyzedSourceFile &second = analyzedFiles[j];
+
+                cout << "Comparing files: "
+                     << first.path.filename()
+                     << " vs "
+                     << second.path.filename() << '\n';
+
+                std::vector<Type1BodyMatch> matches =
+                    findType1BodyMatches(
+                        first.tokens,
+                        first.functionRegions,
+                        second.tokens,
+                        second.functionRegions);
+
+                cout << "Type-1 body-level candidates: "
+                     << matches.size() << '\n';
+
+                if (!matches.empty())
+                {
+                    printType1BodyMatches(
+                        cout,
+                        first.path.filename().string(),
+                        first.tokens,
+                        second.path.filename().string(),
+                        second.tokens,
+                        matches);
+                }
+
+                ++filePairCount;
+            }
+        }
+
+        cout << "Total source-file pairs: "
+             << filePairCount << '\n';
 
         return 0;
     }
@@ -115,6 +186,12 @@ int runCloneScope()
 
     // Display how many tokens were produced.
     cout << "\nTotal tokens: " << tokens.size() << '\n';
+
+    std::vector<CodeRegion> functionRegions =
+        findFunctionBodyRegions(tokens);
+
+    cout << "Supported function-body regions: "
+         << functionRegions.size() << '\n';
 
     return 0;
 }
