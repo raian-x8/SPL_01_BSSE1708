@@ -43,3 +43,28 @@ bool areType1BodyCandidates(
 
     return true;
 }
+
+std::vector<Type1BodyMatch> findType1BodyMatches(
+    const std::vector<Token> &firstTokens,
+    const std::vector<CodeRegion> &firstRegions,
+    const std::vector<Token> &secondTokens,
+    const std::vector<CodeRegion> &secondRegions)
+{
+    std::vector<Type1BodyMatch> matches;
+
+    for (const CodeRegion &firstRegion : firstRegions)
+    {
+        for (const CodeRegion &secondRegion : secondRegions)
+        {
+            if (areType1BodyCandidates(
+                    firstTokens, firstRegion,
+                    secondTokens, secondRegion))
+            {
+                matches.push_back(
+                    Type1BodyMatch{firstRegion, secondRegion});
+            }
+        }
+    }
+
+    return matches;
+}
