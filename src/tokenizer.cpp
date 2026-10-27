@@ -26,6 +26,12 @@ std::vector<Token> tokenize(const std::string &source)
     // Multi-character operators will be handled in a later step.
     static const std::string singleCharOperators = "+-*/%&=";
 
+    // Supported two-character operators, including compound assignments.
+    // Checked before single-character operators to preserve longest matches.
+    static const std::unordered_set<std::string> twoCharOperators = {
+        "==", "++", "--",
+        "+=", "-=", "*=", "/="};
+
     // Track the current character and source location.
     std::size_t index = 0;
     std::size_t line = 1;
@@ -150,6 +156,27 @@ std::vector<Token> tokenize(const std::string &source)
             ++column;
 
             continue;
+        }
+
+        // Recognize supported two-character operators first.
+        if (index + 1 < source.size())
+        {
+            std::string pair = source.substr(index, 2);
+
+            if (twoCharOperators.find(pair) != twoCharOperators.end())
+            {
+                // Preserve the complete operator and its starting location.
+                tokens.push_back(Token{
+                    TokenType::Operator,
+                    pair,
+                    line,
+                    column});
+
+                index += 2;
+                column += 2;
+
+                continue;
+            }
         }
 
         // Recognize a basic single-character operator.

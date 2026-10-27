@@ -102,6 +102,44 @@ int main()
         assert(operatorTokens[i].column == i + 1);
     }
 
+    // Verify supported compound-assignment operators.
+    const std::vector<Token> compoundTokens =
+        tokenize("+= -= *= /=");
+
+    const std::vector<std::string> expectedCompound = {
+        "+=", "-=", "*=", "/="};
+
+    assert(compoundTokens.size() == expectedCompound.size());
+
+    // Verify token text, category, and source position.
+    for (std::size_t i = 0; i < expectedCompound.size(); ++i)
+    {
+        assert(compoundTokens[i].lexeme == expectedCompound[i]);
+        assert(compoundTokens[i].type == TokenType::Operator);
+
+        assert(compoundTokens[i].line == 1);
+        assert(compoundTokens[i].column == 3 * i + 1);
+    }
+
+    // Verify equality, increment, and decrement operators.
+    const std::vector<Token> twoCharTokens =
+        tokenize("== ++ --");
+
+    const std::vector<std::string> expectedTwoChar = {
+        "==", "++", "--"};
+
+    assert(twoCharTokens.size() == expectedTwoChar.size());
+
+    // Verify each two-character operator and its position.
+    for (std::size_t i = 0; i < expectedTwoChar.size(); ++i)
+    {
+        assert(twoCharTokens[i].lexeme == expectedTwoChar[i]);
+        assert(twoCharTokens[i].type == TokenType::Operator);
+
+        assert(twoCharTokens[i].line == 1);
+        assert(twoCharTokens[i].column == 3 * i + 1);
+    }
+
     std::cout << "Tokenizer keyword, identifier, number, punctuation, and operator smoke tests passed.\n";
 
     return 0;
