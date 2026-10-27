@@ -40,7 +40,23 @@ int main()
     assert(numericTokens[5].type == TokenType::Number);
     assert(numericTokens[5].line == 2 && numericTokens[5].column == 11);
 
-    std::cout << "Tokenizer keyword, identifier, and number smoke tests passed.\n";
+    // Test basic floating-point literal recognition.
+    const std::vector<Token> floatTokens =
+        tokenize("double pi = 3.14;\nfloat rate = 0.5;");
+
+    assert(floatTokens.size() == 6);
+
+    // Verify the first floating-point literal.
+    assert(floatTokens[2].lexeme == "3.14");
+    assert(floatTokens[2].type == TokenType::Number);
+    assert(floatTokens[2].line == 1 && floatTokens[2].column == 13);
+
+    // Verify the second floating-point literal.
+    assert(floatTokens[5].lexeme == "0.5");
+    assert(floatTokens[5].type == TokenType::Number);
+    assert(floatTokens[5].line == 2 && floatTokens[5].column == 14);
+
+    std::cout << "Tokenizer keyword, identifier, integer, and floating-point tests passed.\n";
 
     return 0;
 }
