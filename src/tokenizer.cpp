@@ -25,17 +25,21 @@ std::vector<Token> tokenize(const std::string &source)
 
     // Common single-character operators.
     // Used when no supported two-character operator matches.
-    static const std::string singleCharOperators = "+-*/%&=!<>|^~";
+
+    static const std::string singleCharOperators = "+-*/%&=!<>|^~.";
 
     // Supported two-character operators.
     // Checked before single-character operators to preserve longest matches.
+
     static const std::unordered_set<std::string> twoCharOperators = {
         "==", "++", "--",
         "+=", "-=", "*=", "/=",
         "%=", "&=", "|=", "^=",
-        "!=", "<=", ">=", "&&", "||"};
+        "!=", "<=", ">=", "&&", "||",
+        "::", "->"};
 
     // Track the current character and source location.
+
     std::size_t index = 0;
     std::size_t line = 1;
     std::size_t column = 1;

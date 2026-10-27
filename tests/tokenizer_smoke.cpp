@@ -380,6 +380,99 @@ int main()
     assert(unknownTokens[4].lexeme == ";");
     assert(unknownTokens[4].column == 10);
 
+    // Verify the C++ scope resolution operator.
+    const std::vector<Token> scopeTokens =
+        tokenize("std::cout");
+
+    assert(scopeTokens.size() == 3);
+
+    assert(scopeTokens[0].type == TokenType::Identifier);
+    assert(scopeTokens[0].lexeme == "std");
+
+    assert(scopeTokens[1].type == TokenType::Operator);
+    assert(scopeTokens[1].lexeme == "::");
+    assert(scopeTokens[1].line == 1);
+    assert(scopeTokens[1].column == 4);
+
+    assert(scopeTokens[2].type == TokenType::Identifier);
+    assert(scopeTokens[2].lexeme == "cout");
+    assert(scopeTokens[2].column == 6);
+
+    // Verify pointer member access using ->.
+    const std::vector<Token> arrowTokens =
+        tokenize("node->value");
+
+    assert(arrowTokens.size() == 3);
+
+    assert(arrowTokens[0].type == TokenType::Identifier);
+    assert(arrowTokens[0].lexeme == "node");
+
+    assert(arrowTokens[1].type == TokenType::Operator);
+    assert(arrowTokens[1].lexeme == "->");
+    assert(arrowTokens[1].column == 5);
+
+    assert(arrowTokens[2].type == TokenType::Identifier);
+    assert(arrowTokens[2].lexeme == "value");
+    assert(arrowTokens[2].column == 7);
+
+    // Verify direct member access using a dot.
+    const std::vector<Token> dotTokens =
+        tokenize("obj.field");
+
+    assert(dotTokens.size() == 3);
+
+    assert(dotTokens[0].lexeme == "obj");
+
+    assert(dotTokens[1].type == TokenType::Operator);
+    assert(dotTokens[1].lexeme == ".");
+    assert(dotTokens[1].column == 4);
+
+    assert(dotTokens[2].type == TokenType::Identifier);
+    assert(dotTokens[2].lexeme == "field");
+    assert(dotTokens[2].column == 5);
+
+    // Verify tokenization of a mixed multi-line C++ snippet.
+    const std::string mixedSource =
+        "int main() {\n"
+        "    double rate = 3.14;\n"
+        "    node->value = rate;\n"
+        "    return 0;\n"
+        "}";
+
+    const std::vector<Token> mixedTokens =
+        tokenize(mixedSource);
+
+    assert(mixedTokens.size() == 20);
+
+    // Verify the opening keyword.
+    assert(mixedTokens[0].type == TokenType::Keyword);
+    assert(mixedTokens[0].lexeme == "int");
+    assert(mixedTokens[0].line == 1);
+
+    // Verify the decimal number on line 2.
+    assert(mixedTokens[8].type == TokenType::Number);
+    assert(mixedTokens[8].lexeme == "3.14");
+    assert(mixedTokens[8].line == 2);
+    assert(mixedTokens[8].column == 19);
+
+    // Verify pointer member access on line 3.
+    assert(mixedTokens[11].type == TokenType::Operator);
+    assert(mixedTokens[11].lexeme == "->");
+    assert(mixedTokens[11].line == 3);
+    assert(mixedTokens[11].column == 9);
+
+    // Verify the return keyword on line 4.
+    assert(mixedTokens[16].type == TokenType::Keyword);
+    assert(mixedTokens[16].lexeme == "return");
+    assert(mixedTokens[16].line == 4);
+    assert(mixedTokens[16].column == 5);
+
+    // Verify the final closing brace.
+    assert(mixedTokens[19].type == TokenType::Punctuation);
+    assert(mixedTokens[19].lexeme == "}");
+    assert(mixedTokens[19].line == 5);
+    assert(mixedTokens[19].column == 1);
+
     std::cout << "All tokenizer smoke tests passed.\n";
 
     return 0;
