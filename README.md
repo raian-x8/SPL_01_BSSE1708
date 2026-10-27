@@ -32,7 +32,7 @@ It aims to provide explainable evidence for instructors rather than automaticall
 
 ## Current Status
 
-**Development Phase:** Basic Source Preprocessing Implemented and Tested
+**Development Phase:** Source Preprocessing and Basic Tokenization Implemented and Tested
 
 ### Implemented Features
 
@@ -48,6 +48,11 @@ It aims to provide explainable evidence for instructors rather than automaticall
 - Preservation of newlines during supported comment removal.
 - Preprocessing integrated with single-file and folder input.
 - Five passing preprocessing unit tests.
+- Rule-based C/C++ tokenization using C++17.
+- Token classification with lexeme, line, and column information.
+- String and character literal recognition with basic error recovery.
+- Tokenization integrated with single-file and folder processing.
+- Minimal main function with separate application coordination.
 
 ### Testing
 
@@ -61,13 +66,20 @@ The basic preprocessing module has passed five focused unit tests:
 
 Single-file and folder-input preprocessing have also been manually tested using sample source files.
 
+The tokenization module has passed focused regression tests
+covering keywords, identifiers, numeric literals, quoted literals,
+operators, punctuation, unknown tokens, and source positions.
+
+Automated pipeline tests also verify file reading, preprocessing,
+tokenization, and recovery from malformed ordinary literals.
+
 ### Current Limitations
 
 - Directory scanning is non-recursive.
 - File filtering currently supports lowercase `.c` and `.cpp` extensions.
 - The scanner does not fully support raw string literals, line splicing, or all C++ lexical edge cases.
 - The implementation is not a complete C++ lexer or compiler preprocessor.
-- Tokenization and function/block representation are not yet implemented.
+- Basic tokenization is implemented, but function/block-level representation is not yet implemented.
 - Clone detection and stylometric analysis are not yet implemented.
 
 ### Learning Documentation
@@ -76,6 +88,70 @@ Detailed preprocessing concepts, implementation explanations, testing notes, and
 
 [Source Preprocessing Learning Manual](docs/learning-notes/CloneScope_Source_Preprocessing_Learning_Manual.pdf)
 
+[Tokenization Learning Manual](docs/learning-notes/CloneScope_Tokenization_Learning_Manual.pdf)
+
 ### Next Development Milestone
 
-Implement source-code tokenization, followed by function/block-level representation and initial Type-1 and Type-2 clone candidate tagging.
+Complete tokenization documentation and merge the tested tokenization feature into main. Then proceed to function/block-level representation and initial Type-1 and Type-2 clone candidate tagging.
+
+## Tokenization Module
+
+CloneScope includes a lightweight, rule-based C/C++ tokenizer
+implemented in C++17.
+
+### Current Processing Pipeline
+
+1. Read a source file from a user-provided path.
+2. Remove supported comments while preserving source positions.
+3. Convert the preprocessed source into tokens.
+4. Store each token's type, lexeme, line, and column.
+5. Display the total number of generated tokens.
+
+The application supports individual source-file input and
+nonrecursive folder scanning for .c and .cpp files.
+
+### Supported Token Categories
+
+- Selected C/C++ keywords
+- Identifiers
+- Basic decimal integer and floating-point literals
+- Double-quoted string literals
+- Single-quoted character literals
+- Structural punctuation
+- Selected single- and two-character operators
+- Unknown tokens for unsupported non-whitespace characters
+
+### Error Handling
+
+The tokenizer preserves unsupported non-whitespace characters
+as Unknown tokens instead of silently discarding them.
+
+The preprocessor and tokenizer also implement basic recovery
+for unterminated ordinary string and character literals
+encountering a physical newline.
+
+### Current Limitations
+
+- The tokenizer does not implement the complete C/C++ grammar.
+- Preprocessor directives and macro expansion are not fully supported.
+- Raw string literals and full C++ line-splicing rules are unsupported.
+- Advanced numeric literal forms are not fully supported.
+- Some C/C++ operators and lexical constructs remain unsupported.
+- Folder scanning is nonrecursive.
+- Tokenization alone does not detect plagiarism or code clones.
+
+### Verification
+
+The following test programs have been used:
+
+- tests/preprocessor_smoke.cpp
+- tests/tokenizer_smoke.cpp
+- tests/pipeline_smoke.cpp
+
+The file-processing pipeline has also been manually verified
+using actual C/C++ files in the samples directory.
+
+### Next Development Stage
+
+The generated token sequences will serve as input for
+subsequent code-clone analysis and explainable reporting.
