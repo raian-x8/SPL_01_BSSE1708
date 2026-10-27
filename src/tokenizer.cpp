@@ -4,10 +4,11 @@
 
 #include <unordered_set>
 
-// Converts C/C++ source text into tokens.
-// Currently recognizes identifiers, selected keywords,
-// basic decimal numeric literals, structural punctuation,
-// and selected single- and two-character operators.
+// Converts supported C/C++ source text into tokens.
+// Recognizes identifiers, selected keywords, decimal numbers,
+// quoted string and character literals, punctuation, and operators.
+// Preserves unsupported non-whitespace characters as Unknown tokens.
+// Tracks the starting line and column of each token.
 
 std::vector<Token> tokenize(const std::string &source)
 {
@@ -42,6 +43,58 @@ std::vector<Token> tokenize(const std::string &source)
     while (index < source.size())
     {
         char current = source[index];
+
+        // Recognize a basic double-quoted string literal.
+        if (current == '"')
+        {
+            std::size_t start = index;
+            std::size_t startColumn = column;
+
+            // Consume the opening quotation mark.
+            ++index;
+            ++column;
+
+            // Stop at the closing quote, newline, or end of input.
+            while (index < source.size() &&
+                   source[index] != '"' &&
+                   source[index] != '\n')
+            {
+                // Consume an escape sequence without crossing a newline.
+                if (source[index] == '\\' &&
+                    index + 1 < source.size() &&
+                    source[index + 1] != '\n')
+                {
+                    index += 2;
+                    column += 2;
+                }
+                else
+                {
+                    ++index;
+                    ++column;
+                }
+            }
+
+            // Assume the string is unterminated until a closing quote is found.
+            TokenType type = TokenType::Unknown;
+
+            // Check whether the scanner found a closing quotation mark.
+            if (index < source.size() && source[index] == '"')
+            {
+                ++index;
+                ++column;
+
+                type = TokenType::StringLiteral;
+            }
+
+            // Store the quoted text with its determined token type.
+            tokens.push_back(Token{
+                type,
+                source.substr(start, index - start),
+                line,
+                startColumn});
+
+            continue;
+        }
 
         // Recognize an identifier beginning with a letter or underscore.
         unsigned char ch = static_cast<unsigned char>(current);
@@ -144,6 +197,60 @@ std::vector<Token> tokenize(const std::string &source)
             continue;
         }
 
+        // Recognize a basic single-quoted character literal.
+        if (current == '\'')
+        {
+            std::size_t start = index;
+            std::size_t startColumn = column;
+
+            // Consume the opening single quotation mark.
+            ++index;
+            ++column;
+
+            // Stop at the closing quote, newline, or end of input.
+            while (index < source.size() &&
+                   source[index] != '\'' &&
+                   source[index] != '\n')
+            {
+                // Consume an escape sequence without crossing a newline.
+                if (source[index] == '\\' &&
+                    index + 1 < source.size() &&
+                    source[index + 1] != '\n')
+                {
+                    index += 2;
+                    column += 2;
+                }
+                else
+                {
+                    ++index;
+                    ++column;
+                }
+            }
+
+            // Assume the character literal is unterminated.
+            TokenType type = TokenType::Unknown;
+
+            // Confirm that a closing single quotation mark was found.
+            if (index < source.size() && source[index] == '\'')
+            {
+                // Consume the closing single quotation mark.
+                ++index;
+                ++column;
+
+                // A complete character literal was recognized.
+                type = TokenType::CharLiteral;
+            }
+
+            // Store the character text with its determined token type.
+            tokens.push_back(Token{
+                type,
+                source.substr(start, index - start),
+                line,
+                startColumn});
+
+            continue;
+        }
+
         // Recognize single-character structural punctuation.
         if (punctuation.find(current) != std::string::npos)
         {
@@ -195,6 +302,16 @@ std::vector<Token> tokenize(const std::string &source)
             ++column;
 
             continue;
+        }
+
+        // Preserve unsupported non-whitespace characters.
+        if (!std::isspace(static_cast<unsigned char>(current)))
+        {
+            tokens.push_back(Token{
+                TokenType::Unknown,
+                source.substr(index, 1),
+                line,
+                column});
         }
 
         if (current == '\n')
