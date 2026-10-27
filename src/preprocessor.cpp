@@ -92,14 +92,24 @@ std::string removeComments(const std::string &source)
 
         else if (state == ScanState::StringLiteral)
         {
-            if (current == '\\' && i + 1 < source.size())
+            // Recover when an ordinary string reaches a physical newline.
+            if (current == '\n')
             {
+                result += '\n';
+                state = ScanState::Normal;
+            }
+            else if (current == '\\' &&
+                     i + 1 < source.size() &&
+                     source[i + 1] != '\n')
+            {
+                // Preserve an escape sequence without crossing a newline.
                 result += current;
                 result += source[i + 1];
                 ++i;
             }
             else if (current == '"')
             {
+                // A closing quotation mark ends the string.
                 result += current;
                 state = ScanState::Normal;
             }
@@ -111,14 +121,24 @@ std::string removeComments(const std::string &source)
 
         else if (state == ScanState::CharLiteral)
         {
-            if (current == '\\' && i + 1 < source.size())
+            // Recover when an ordinary character literal reaches a newline.
+            if (current == '\n')
             {
+                result += '\n';
+                state = ScanState::Normal;
+            }
+            else if (current == '\\' &&
+                     i + 1 < source.size() &&
+                     source[i + 1] != '\n')
+            {
+                // Preserve an escape sequence without crossing a newline.
                 result += current;
                 result += source[i + 1];
                 ++i;
             }
             else if (current == '\'')
             {
+                // A closing single quotation mark ends the character literal.
                 result += current;
                 state = ScanState::Normal;
             }
