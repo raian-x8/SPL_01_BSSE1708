@@ -5,7 +5,7 @@
 #include <unordered_set>
 
 // Converts C/C++ source text into tokens.
-// Currently recognizes identifiers and a subset of keywords.
+// Currently recognizes identifiers, selected keywords, and decimal integers.
 
 std::vector<Token> tokenize(const std::string &source)
 {
@@ -63,6 +63,37 @@ std::vector<Token> tokenize(const std::string &source)
             tokens.push_back(Token{
                 type,
                 lexeme,
+                line,
+                startColumn});
+
+            continue;
+        }
+
+        // Recognize a decimal integer literal.
+        if (std::isdigit(ch))
+        {
+            std::size_t start = index;
+            std::size_t startColumn = column;
+
+            // Consume consecutive decimal digits.
+            while (index < source.size())
+            {
+                unsigned char next =
+                    static_cast<unsigned char>(source[index]);
+
+                if (!std::isdigit(next))
+                {
+                    break;
+                }
+
+                ++index;
+                ++column;
+            }
+
+            // Store the number and its starting location.
+            tokens.push_back(Token{
+                TokenType::Number,
+                source.substr(start, index - start),
                 line,
                 startColumn});
 
