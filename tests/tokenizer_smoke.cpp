@@ -34,33 +34,33 @@ int main()
     const std::vector<Token> numericTokens =
         tokenize("int x = 123;\nfloat y = 45;");
 
-    assert(numericTokens.size() == 8);
+    assert(numericTokens.size() == 10);
 
     // Verify the first decimal integer.
-    assert(numericTokens[2].lexeme == "123");
-    assert(numericTokens[2].type == TokenType::Number);
-    assert(numericTokens[2].line == 1 && numericTokens[2].column == 9);
+    assert(numericTokens[3].lexeme == "123");
+    assert(numericTokens[3].type == TokenType::Number);
+    assert(numericTokens[3].line == 1 && numericTokens[3].column == 9);
 
     // Verify the second decimal integer.
-    assert(numericTokens[6].lexeme == "45");
-    assert(numericTokens[6].type == TokenType::Number);
-    assert(numericTokens[6].line == 2 && numericTokens[6].column == 11);
+    assert(numericTokens[8].lexeme == "45");
+    assert(numericTokens[8].type == TokenType::Number);
+    assert(numericTokens[8].line == 2 && numericTokens[8].column == 11);
 
     // Test basic floating-point literal recognition.
     const std::vector<Token> floatTokens =
         tokenize("double pi = 3.14;\nfloat rate = 0.5;");
 
-    assert(floatTokens.size() == 8);
+    assert(floatTokens.size() == 10);
 
     // Verify the first floating-point literal.
-    assert(floatTokens[2].lexeme == "3.14");
-    assert(floatTokens[2].type == TokenType::Number);
-    assert(floatTokens[2].line == 1 && floatTokens[2].column == 13);
+    assert(floatTokens[3].lexeme == "3.14");
+    assert(floatTokens[3].type == TokenType::Number);
+    assert(floatTokens[3].line == 1 && floatTokens[3].column == 13);
 
     // Verify the second floating-point literal.
-    assert(floatTokens[6].lexeme == "0.5");
-    assert(floatTokens[6].type == TokenType::Number);
-    assert(floatTokens[6].line == 2 && floatTokens[6].column == 14);
+    assert(floatTokens[8].lexeme == "0.5");
+    assert(floatTokens[8].type == TokenType::Number);
+    assert(floatTokens[8].line == 2 && floatTokens[8].column == 14);
 
     // Verify all supported structural punctuation characters.
     const std::string expectedPunctuation = "(){}[],;";
@@ -82,7 +82,27 @@ int main()
         assert(punctuationTokens[i].column == i + 1);
     }
 
-    std::cout << "Tokenizer keyword, identifier, number, and punctuation smoke tests passed.\n";
+    // Verify all currently supported single-character operators.
+    const std::string expectedOperators = "+-*/%&=";
+
+    const std::vector<Token> operatorTokens =
+        tokenize(expectedOperators);
+
+    assert(operatorTokens.size() == expectedOperators.size());
+
+    // Verify each operator's category, lexeme, and source location.
+    for (std::size_t i = 0; i < expectedOperators.size(); ++i)
+    {
+        assert(operatorTokens[i].type == TokenType::Operator);
+
+        assert(operatorTokens[i].lexeme ==
+               expectedOperators.substr(i, 1));
+
+        assert(operatorTokens[i].line == 1);
+        assert(operatorTokens[i].column == i + 1);
+    }
+
+    std::cout << "Tokenizer keyword, identifier, number, punctuation, and operator smoke tests passed.\n";
 
     return 0;
 }
