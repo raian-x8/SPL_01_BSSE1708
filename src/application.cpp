@@ -21,6 +21,10 @@
 
 #include "type1_report.hpp"
 
+#include "type2_clone.hpp"
+
+#include "type2_report.hpp"
+
 #include <vector>
 
 using namespace std;
@@ -58,8 +62,31 @@ int runCloneScope()
 
         std::vector<AnalyzedSourceFile> analyzedFiles;
 
+        std::vector<fs::directory_entry> entries;
+
+        string scanChoice;
+
+        cout << "Scan subfolders recursively? (y/n): ";
+        getline(cin, scanChoice);
+        if (scanChoice == "y" || scanChoice == "Y")
+        {
+            for (const auto &entry :
+                 fs::recursive_directory_iterator(sourcePath))
+            {
+                entries.push_back(entry);
+            }
+        }
+        else
+        {
+            for (const auto &entry :
+                 fs::directory_iterator(sourcePath))
+            {
+                entries.push_back(entry);
+            }
+        }
+
         // Visit each entry directly inside the folder
-        for (const auto &entry : fs::directory_iterator(sourcePath))
+        for (const auto &entry : entries)
         {
             if (entry.is_regular_file() &&
                 (entry.path().extension() == ".c" ||
@@ -120,10 +147,16 @@ int runCloneScope()
                 const AnalyzedSourceFile &first = analyzedFiles[i];
                 const AnalyzedSourceFile &second = analyzedFiles[j];
 
+                const std::string firstRelativePath =
+                    first.path.lexically_relative(sourcePath).generic_string();
+
+                const std::string secondRelativePath =
+                    second.path.lexically_relative(sourcePath).generic_string();
+
                 cout << "Comparing files: "
-                     << first.path.filename()
+                     << firstRelativePath
                      << " vs "
-                     << second.path.filename() << '\n';
+                     << secondRelativePath << '\n';
 
                 std::vector<Type1BodyMatch> matches =
                     findType1BodyMatches(
@@ -139,11 +172,32 @@ int runCloneScope()
                 {
                     printType1BodyMatches(
                         cout,
-                        first.path.filename().string(),
+                        firstRelativePath,
                         first.tokens,
-                        second.path.filename().string(),
+                        secondRelativePath,
                         second.tokens,
                         matches);
+                }
+
+                std::vector<Type2BodyMatch> type2Matches =
+                    findType2BodyMatches(
+                        first.tokens,
+                        first.functionRegions,
+                        second.tokens,
+                        second.functionRegions);
+
+                cout << "Type-2 body-level candidates: "
+                     << type2Matches.size() << '\n';
+
+                if (!type2Matches.empty())
+                {
+                    printType2BodyMatches(
+                        cout,
+                        firstRelativePath,
+                        first.tokens,
+                        secondRelativePath,
+                        second.tokens,
+                        type2Matches);
                 }
 
                 ++filePairCount;
