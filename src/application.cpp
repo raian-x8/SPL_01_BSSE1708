@@ -25,6 +25,8 @@
 
 #include "type2_report.hpp"
 
+#include "source_statistics.hpp"
+
 #include <vector>
 
 using namespace std;
@@ -36,6 +38,7 @@ struct AnalyzedSourceFile
     fs::path path;
     std::vector<Token> tokens;
     std::vector<CodeRegion> functionRegions;
+    SourceStatistics statistics;
 };
 
 int runCloneScope()
@@ -130,8 +133,25 @@ int runCloneScope()
                 cout << "Supported function-body regions: "
                      << functionRegions.size() << '\n';
 
+                // Calculate statistics for the current source file.
+                SourceStatistics statistics = calculateSourceStatistics(
+                    sourceCode,
+                    tokens.size(),
+                    functionRegions.size());
+
+                // Display source-line statistics.
+                cout << "Total source lines: "
+                     << statistics.totalLines << '\n';
+
+                cout << "Blank source lines: "
+                     << statistics.blankLines << '\n';
+
                 analyzedFiles.push_back(
-                    AnalyzedSourceFile{entry.path(), tokens, functionRegions});
+                    AnalyzedSourceFile{
+                        entry.path(),
+                        tokens,
+                        functionRegions,
+                        statistics});
             }
         }
 
@@ -246,6 +266,19 @@ int runCloneScope()
 
     cout << "Supported function-body regions: "
          << functionRegions.size() << '\n';
+
+    // Calculate statistics for the current source file.
+    SourceStatistics statistics = calculateSourceStatistics(
+        sourceCode,
+        tokens.size(),
+        functionRegions.size());
+
+    // Display the calculated line statistics.
+    cout << "Total source lines: "
+         << statistics.totalLines << '\n';
+
+    cout << "Blank source lines: "
+         << statistics.blankLines << '\n';
 
     return 0;
 }
