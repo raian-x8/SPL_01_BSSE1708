@@ -24,6 +24,9 @@ struct AggregateStatistics
     std::size_t blankLines = 0;
     std::size_t totalTokens = 0;
     std::size_t totalRecognizedFunctionBodies = 0;
+
+    std::size_t type1CandidateCount = 0;
+    std::size_t type2OnlyCandidateCount = 0;
 };
 
 void accumulateSourceStatistics(

@@ -206,6 +206,8 @@ int runCloneScope()
                         second.tokens,
                         second.functionRegions);
 
+                aggregate.type1CandidateCount += matches.size();
+
                 cout << "Type-1 body-level candidates: "
                      << matches.size() << '\n';
 
@@ -227,6 +229,8 @@ int runCloneScope()
                         second.tokens,
                         second.functionRegions);
 
+                aggregate.type2OnlyCandidateCount += type2Matches.size();
+
                 cout << "Type-2 body-level candidates: "
                      << type2Matches.size() << '\n';
 
@@ -247,6 +251,18 @@ int runCloneScope()
 
         cout << "Total source-file pairs: "
              << filePairCount << '\n';
+
+        // Display the aggregate clone-candidate summary.
+        cout << "\nClone candidate summary:\n";
+
+        cout << "Total Type-1 body candidates: "
+             << aggregate.type1CandidateCount << '\n';
+
+        cout << "Total Type-2-only body candidates: "
+             << aggregate.type2OnlyCandidateCount << '\n';
+
+        cout << "Human review required; "
+             << "similarity is not proof of plagiarism.\n";
 
         return 0;
     }
