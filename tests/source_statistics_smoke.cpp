@@ -51,6 +51,25 @@ int main()
     std::cout << "Supplied counts: "
               << (suppliedCounts ? "PASS" : "FAIL") << '\n';
 
+    // Verify aggregation across two source files.
+    AggregateStatistics aggregate;
+
+    const SourceStatistics firstSource{10, 2, 20, 1};
+    const SourceStatistics secondSource{15, 3, 30, 2};
+
+    accumulateSourceStatistics(aggregate, firstSource);
+    accumulateSourceStatistics(aggregate, secondSource);
+
+    const bool aggregateTotals =
+        aggregate.fileCount == 2 &&
+        aggregate.totalLines == 25 &&
+        aggregate.blankLines == 5 &&
+        aggregate.totalTokens == 50 &&
+        aggregate.totalRecognizedFunctionBodies == 3;
+
+    std::cout << "Two-file aggregation: "
+              << (aggregateTotals ? "PASS" : "FAIL") << '\n';
+
     return (empty && single && trailing &&
             whitespace && windows && suppliedCounts)
                ? 0

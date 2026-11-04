@@ -65,6 +65,8 @@ int runCloneScope()
 
         std::vector<AnalyzedSourceFile> analyzedFiles;
 
+        AggregateStatistics aggregate;
+
         std::vector<fs::directory_entry> entries;
 
         string scanChoice;
@@ -146,6 +148,9 @@ int runCloneScope()
                 cout << "Blank source lines: "
                      << statistics.blankLines << '\n';
 
+                // Add this file's statistics to the aggregate totals.
+                accumulateSourceStatistics(aggregate, statistics);
+
                 analyzedFiles.push_back(
                     AnalyzedSourceFile{
                         entry.path(),
@@ -157,6 +162,22 @@ int runCloneScope()
 
         cout << "\nAnalyzed source files stored: "
              << analyzedFiles.size() << '\n';
+
+        // Display combined source-file statistics.
+        cout << "Aggregate source files: "
+             << aggregate.fileCount << '\n';
+
+        cout << "Aggregate source lines: "
+             << aggregate.totalLines << '\n';
+
+        cout << "Aggregate blank lines: "
+             << aggregate.blankLines << '\n';
+
+        cout << "Aggregate tokens: "
+             << aggregate.totalTokens << '\n';
+
+        cout << "Aggregate recognized function bodies: "
+             << aggregate.totalRecognizedFunctionBodies << '\n';
 
         std::size_t filePairCount = 0;
 

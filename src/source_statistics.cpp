@@ -39,3 +39,19 @@ SourceStatistics calculateSourceStatistics(
 
     return statistics;
 }
+
+void accumulateSourceStatistics(
+    AggregateStatistics &aggregate,
+    const SourceStatistics &sourceStatistics)
+{
+    ++aggregate.fileCount;
+
+    aggregate.totalLines += sourceStatistics.totalLines;
+
+    aggregate.blankLines += sourceStatistics.blankLines;
+
+    aggregate.totalTokens += sourceStatistics.tokenCount;
+
+    aggregate.totalRecognizedFunctionBodies +=
+        sourceStatistics.recognizedFunctionBodies;
+}
