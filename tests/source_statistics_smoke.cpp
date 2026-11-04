@@ -71,7 +71,7 @@ int main()
               << (aggregateTotals ? "PASS" : "FAIL") << '\n';
 
     return (empty && single && trailing &&
-            whitespace && windows && suppliedCounts)
+            whitespace && windows && suppliedCounts && aggregateTotals)
                ? 0
                : 1;
 }

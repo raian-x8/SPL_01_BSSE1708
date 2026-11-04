@@ -27,7 +27,11 @@
 
 #include "source_statistics.hpp"
 
+#include "identifier_style.hpp"
+
 #include <vector>
+
+#include <map>
 
 using namespace std;
 
@@ -39,6 +43,7 @@ struct AnalyzedSourceFile
     std::vector<Token> tokens;
     std::vector<CodeRegion> functionRegions;
     SourceStatistics statistics;
+    IdentifierStyleStatistics identifierStats;
 };
 
 int runCloneScope()
@@ -148,6 +153,33 @@ int runCloneScope()
                 cout << "Blank source lines: "
                      << statistics.blankLines << '\n';
 
+                // Calculate identifier-naming statistics for this source file.
+                IdentifierStyleStatistics identifierStats =
+                    calculateIdentifierStyleStatistics(tokens);
+
+                // Display the number of unique identifiers.
+                cout << "Unique identifier names: "
+                     << identifierStats.uniqueIdentifierCount << '\n';
+
+                // Display the naming-style distribution.
+                cout << "camelCase identifiers: "
+                     << identifierStats.camelCase << '\n';
+
+                cout << "PascalCase identifiers: "
+                     << identifierStats.pascalCase << '\n';
+
+                cout << "snake_case identifiers: "
+                     << identifierStats.snakeCase << '\n';
+
+                cout << "Lowercase identifiers: "
+                     << identifierStats.lowercase << '\n';
+
+                cout << "Single-letter identifiers: "
+                     << identifierStats.singleLetter << '\n';
+
+                cout << "Other identifier styles: "
+                     << identifierStats.other << '\n';
+
                 // Add this file's statistics to the aggregate totals.
                 accumulateSourceStatistics(aggregate, statistics);
 
@@ -156,12 +188,45 @@ int runCloneScope()
                         entry.path(),
                         tokens,
                         functionRegions,
-                        statistics});
+                        statistics,
+                        identifierStats});
             }
         }
 
         cout << "\nAnalyzed source files stored: "
              << analyzedFiles.size() << '\n';
+
+        // Group analyzed source files by their student folder.
+        std::map<std::string, std::vector<std::size_t>> studentFileIndices;
+
+        for (std::size_t i = 0; i < analyzedFiles.size(); ++i)
+        {
+            const fs::path relativePath =
+                analyzedFiles[i].path.lexically_relative(sourcePath);
+
+            // Files directly inside the selected folder have no student folder.
+            if (!relativePath.has_parent_path())
+            {
+                continue;
+            }
+
+            // The first folder component represents the student.
+            const std::string studentId =
+                (*relativePath.begin()).string();
+
+            studentFileIndices[studentId].push_back(i);
+        }
+
+        // Display the detected student groups.
+        cout << "\nStudent folders detected: "
+             << studentFileIndices.size() << '\n';
+
+        for (const auto &student : studentFileIndices)
+        {
+            cout << "Student: " << student.first
+                 << " | Source files: " << student.second.size()
+                 << '\n';
+        }
 
         // Display combined source-file statistics.
         cout << "Aggregate source files: "
@@ -316,6 +381,33 @@ int runCloneScope()
 
     cout << "Blank source lines: "
          << statistics.blankLines << '\n';
+
+    // Calculate identifier-naming statistics for the selected file.
+    IdentifierStyleStatistics identifierStats =
+        calculateIdentifierStyleStatistics(tokens);
+
+    // Display unique identifier count.
+    cout << "Unique identifier names: "
+         << identifierStats.uniqueIdentifierCount << '\n';
+
+    // Display identifier naming patterns.
+    cout << "camelCase identifiers: "
+         << identifierStats.camelCase << '\n';
+
+    cout << "PascalCase identifiers: "
+         << identifierStats.pascalCase << '\n';
+
+    cout << "snake_case identifiers: "
+         << identifierStats.snakeCase << '\n';
+
+    cout << "Lowercase identifiers: "
+         << identifierStats.lowercase << '\n';
+
+    cout << "Single-letter identifiers: "
+         << identifierStats.singleLetter << '\n';
+
+    cout << "Other identifier styles: "
+         << identifierStats.other << '\n';
 
     return 0;
 }
