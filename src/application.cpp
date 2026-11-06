@@ -29,9 +29,13 @@
 
 #include "identifier_style.hpp"
 
+#include "identifier_history.hpp"
+
 #include <vector>
 
 #include <map>
+
+#include <algorithm>
 
 using namespace std;
 
@@ -226,6 +230,74 @@ int runCloneScope()
             cout << "Student: " << student.first
                  << " | Source files: " << student.second.size()
                  << '\n';
+        }
+
+        // Analyze historical identifier-naming patterns for each student.
+        cout << "\nExperimental identifier-style history:\n";
+
+        for (auto &student : studentFileIndices)
+        {
+            std::vector<std::size_t> &fileIndices = student.second;
+
+            // Require at least two historical files and one current file.
+            if (fileIndices.size() < 3)
+            {
+                cout << "Student: " << student.first
+                     << " | Insufficient historical submissions.\n";
+                continue;
+            }
+
+            // Order the files by their assignment filenames.
+            std::sort(
+                fileIndices.begin(),
+                fileIndices.end(),
+                [&analyzedFiles](std::size_t first, std::size_t second)
+                {
+                    return analyzedFiles[first].path.filename().string() <
+                           analyzedFiles[second].path.filename().string();
+                });
+
+            // Collect the statistics from all preceding assignments.
+            std::vector<IdentifierStyleStatistics> historicalFiles;
+
+            for (std::size_t i = 0; i + 1 < fileIndices.size(); ++i)
+            {
+                historicalFiles.push_back(
+                    analyzedFiles[fileIndices[i]].identifierStats);
+            }
+
+            // The last assignment is treated as the current submission.
+            const AnalyzedSourceFile &currentFile =
+                analyzedFiles[fileIndices.back()];
+
+            const IdentifierHistoryResult result =
+                analyzeIdentifierHistory(
+                    historicalFiles,
+                    currentFile.identifierStats);
+
+            cout << "Student: " << student.first
+                 << " | Current file: "
+                 << currentFile.path.filename().string()
+                 << '\n';
+
+            if (!result.sufficientData)
+            {
+                cout << "Insufficient identifier evidence.\n";
+            }
+            else if (!result.stableHistoricalStyle)
+            {
+                cout << "No stable historical naming convention.\n";
+            }
+            else if (result.reviewRecommended)
+            {
+                cout << "Naming-style deviation detected.\n";
+                cout << "Human review recommended; "
+                     << "this is not proof of plagiarism.\n";
+            }
+            else
+            {
+                cout << "No clear naming-style deviation detected.\n";
+            }
         }
 
         // Display combined source-file statistics.
