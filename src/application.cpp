@@ -31,6 +31,8 @@
 
 #include "identifier_history.hpp"
 
+#include "comment_style.hpp"
+
 #include <vector>
 
 #include <map>
@@ -48,6 +50,7 @@ struct AnalyzedSourceFile
     std::vector<CodeRegion> functionRegions;
     SourceStatistics statistics;
     IdentifierStyleStatistics identifierStats;
+    CommentStyleStatistics commentStats;
 };
 
 int runCloneScope()
@@ -128,6 +131,10 @@ int runCloneScope()
                 // Remove comments from this source file
                 std::string cleanedCode = removeComments(sourceCode);
 
+                // Analyze comments using the original and cleaned source.
+                CommentStyleStatistics commentStats =
+                    calculateCommentStyleStatistics(sourceCode, cleanedCode);
+
                 // Display the processed source code
                 cout << "Preprocessed source code:\n";
                 cout << cleanedCode << '\n';
@@ -156,6 +163,15 @@ int runCloneScope()
 
                 cout << "Blank source lines: "
                      << statistics.blankLines << '\n';
+
+                cout << "Lines containing comments: "
+                     << commentStats.commentLines << '\n';
+
+                cout << "Comment-only lines: "
+                     << commentStats.commentOnlyLines << '\n';
+
+                cout << "Inline-comment lines: "
+                     << commentStats.inlineCommentLines << '\n';
 
                 // Calculate identifier-naming statistics for this source file.
                 IdentifierStyleStatistics identifierStats =
@@ -193,7 +209,8 @@ int runCloneScope()
                         tokens,
                         functionRegions,
                         statistics,
-                        identifierStats});
+                        identifierStats,
+                        commentStats});
             }
         }
 
@@ -437,6 +454,10 @@ int runCloneScope()
     // Remove comments from the source code
     std::string cleanedCode = removeComments(sourceCode);
 
+    // Analyze commenting patterns in the selected source file.
+    CommentStyleStatistics commentStats =
+        calculateCommentStyleStatistics(sourceCode, cleanedCode);
+
     // Display the preprocessed source code.
     cout << "Preprocessed source code:\n";
     cout << cleanedCode;
@@ -465,6 +486,15 @@ int runCloneScope()
 
     cout << "Blank source lines: "
          << statistics.blankLines << '\n';
+
+    cout << "Lines containing comments: "
+         << commentStats.commentLines << '\n';
+
+    cout << "Comment-only lines: "
+         << commentStats.commentOnlyLines << '\n';
+
+    cout << "Inline-comment lines: "
+         << commentStats.inlineCommentLines << '\n';
 
     // Calculate identifier-naming statistics for the selected file.
     IdentifierStyleStatistics identifierStats =
