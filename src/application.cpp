@@ -33,11 +33,15 @@
 
 #include "comment_style.hpp"
 
+#include "comment_history.hpp"
+
 #include <vector>
 
 #include <map>
 
 #include <algorithm>
+
+#include <cmath>
 
 using namespace std;
 
@@ -250,7 +254,7 @@ int runCloneScope()
         }
 
         // Analyze historical identifier-naming patterns for each student.
-        cout << "\nExperimental identifier-style history:\n";
+        cout << "\nExperimental student style history:\n";
 
         for (auto &student : studentFileIndices)
         {
@@ -274,13 +278,23 @@ int runCloneScope()
                            analyzedFiles[second].path.filename().string();
                 });
 
-            // Collect the statistics from all preceding assignments.
+            // Collect statistics from all preceding assignments.
             std::vector<IdentifierStyleStatistics> historicalFiles;
+            std::vector<CommentHistorySample> historicalCommentFiles;
 
             for (std::size_t i = 0; i + 1 < fileIndices.size(); ++i)
             {
+                const AnalyzedSourceFile &historicalFile =
+                    analyzedFiles[fileIndices[i]];
+
                 historicalFiles.push_back(
-                    analyzedFiles[fileIndices[i]].identifierStats);
+                    historicalFile.identifierStats);
+
+                historicalCommentFiles.push_back(
+                    CommentHistorySample{
+                        historicalFile.statistics.totalLines,
+                        historicalFile.statistics.blankLines,
+                        historicalFile.commentStats.commentLines});
             }
 
             // The last assignment is treated as the current submission.
@@ -291,6 +305,16 @@ int runCloneScope()
                 analyzeIdentifierHistory(
                     historicalFiles,
                     currentFile.identifierStats);
+
+            const CommentHistorySample currentCommentSample{
+                currentFile.statistics.totalLines,
+                currentFile.statistics.blankLines,
+                currentFile.commentStats.commentLines};
+
+            const CommentHistoryResult commentResult =
+                analyzeCommentHistory(
+                    historicalCommentFiles,
+                    currentCommentSample);
 
             cout << "Student: " << student.first
                  << " | Current file: "
@@ -326,6 +350,42 @@ int runCloneScope()
             else
             {
                 cout << "No clear naming-style deviation detected.\n";
+            }
+
+            // Report historical commenting-style analysis.
+            cout << "Commenting-style history:\n";
+
+            if (!commentResult.sufficientData)
+            {
+                cout << "Insufficient source-line evidence "
+                     << "for commenting-history analysis.\n";
+            }
+            else if (!commentResult.stableHistoricalRate)
+            {
+                cout << "No stable historical commenting rate.\n";
+            }
+            else
+            {
+                cout << "Historical comment rate: "
+                     << std::lround(
+                            commentResult.historicalCommentRate * 100.0)
+                     << "%\n";
+
+                cout << "Current comment rate: "
+                     << std::lround(
+                            commentResult.currentCommentRate * 100.0)
+                     << "%\n";
+
+                if (commentResult.reviewRecommended)
+                {
+                    cout << "Commenting-style deviation detected.\n";
+                    cout << "Human review recommended; "
+                         << "this is not proof of plagiarism.\n";
+                }
+                else
+                {
+                    cout << "No clear commenting-style deviation detected.\n";
+                }
             }
         }
 
