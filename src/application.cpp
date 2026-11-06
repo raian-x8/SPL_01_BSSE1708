@@ -280,6 +280,18 @@ int runCloneScope()
                  << currentFile.path.filename().string()
                  << '\n';
 
+            // Display conventions only when historical analysis is meaningful.
+            if (result.sufficientData && result.stableHistoricalStyle)
+            {
+                cout << "Historical convention: "
+                     << identifierStyleName(result.historicalDominantStyle)
+                     << '\n';
+
+                cout << "Current convention: "
+                     << identifierStyleName(result.currentDominantStyle)
+                     << '\n';
+            }
+
             if (!result.sufficientData)
             {
                 cout << "Insufficient identifier evidence.\n";

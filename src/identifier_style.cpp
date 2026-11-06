@@ -139,3 +139,30 @@ IdentifierStyleStatistics calculateIdentifierStyleStatistics(
 
     return statistics;
 }
+
+std::string identifierStyleName(
+    IdentifierStyle style)
+{
+    switch (style)
+    {
+    case IdentifierStyle::CamelCase:
+        return "camelCase";
+
+    case IdentifierStyle::PascalCase:
+        return "PascalCase";
+
+    case IdentifierStyle::SnakeCase:
+        return "snake_case";
+
+    case IdentifierStyle::Lowercase:
+        return "lowercase";
+
+    case IdentifierStyle::SingleLetter:
+        return "single-letter";
+
+    case IdentifierStyle::Other:
+        return "Other";
+    }
+
+    return "Other";
+}

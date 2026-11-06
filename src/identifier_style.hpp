@@ -19,6 +19,9 @@ enum class IdentifierStyle
 IdentifierStyle classifyIdentifierStyle(
     const std::string &identifier);
 
+std::string identifierStyleName(
+    IdentifierStyle style);
+
 struct IdentifierStyleStatistics
 {
     std::size_t uniqueIdentifierCount = 0;

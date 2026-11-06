@@ -97,5 +97,23 @@ int main()
         allPassed = false;
     }
 
+    // Verify human-readable identifier-style labels.
+    const bool styleNamesPassed =
+        identifierStyleName(IdentifierStyle::CamelCase) == "camelCase" &&
+        identifierStyleName(IdentifierStyle::PascalCase) == "PascalCase" &&
+        identifierStyleName(IdentifierStyle::SnakeCase) == "snake_case" &&
+        identifierStyleName(IdentifierStyle::Lowercase) == "lowercase" &&
+        identifierStyleName(IdentifierStyle::SingleLetter) == "single-letter" &&
+        identifierStyleName(IdentifierStyle::Other) == "Other";
+
+    std::cout << "Identifier style labels: "
+              << (styleNamesPassed ? "PASS" : "FAIL")
+              << '\n';
+
+    if (!styleNamesPassed)
+    {
+        allPassed = false;
+    }
+
     return allPassed ? 0 : 1;
 }
