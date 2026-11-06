@@ -25,6 +25,10 @@
 
 #include "type2_report.hpp"
 
+#include "clone_summary.hpp"
+
+#include "analysis_report.hpp"
+
 #include "source_statistics.hpp"
 
 #include "identifier_style.hpp"
@@ -258,8 +262,14 @@ int runCloneScope()
         // Analyze historical identifier-naming patterns for each student.
         cout << "\nExperimental student style history:\n";
 
+        std::vector<StudentStyleFinding> studentFindings;
+
         for (auto &student : studentFileIndices)
         {
+            studentFindings.push_back(StudentStyleFinding{});
+            StudentStyleFinding &finding = studentFindings.back();
+            finding.studentId = student.first;
+
             std::vector<std::size_t> &fileIndices = student.second;
 
             // Require at least two historical files and one current file.
@@ -340,6 +350,16 @@ int runCloneScope()
                 analyzeCommentHistory(
                     historicalCommentFiles,
                     currentCommentSample);
+
+            finding.namingEvaluated =
+                result.sufficientData && result.stableHistoricalStyle;
+            finding.namingDeviation =
+                finding.namingEvaluated && result.reviewRecommended;
+            finding.commentingEvaluated =
+                commentResult.sufficientData &&
+                commentResult.stableHistoricalRate;
+            finding.commentingDeviation =
+                finding.commentingEvaluated && commentResult.reviewRecommended;
 
             cout << "Student: " << student.first
                  << " | Current file: "
@@ -431,6 +451,7 @@ int runCloneScope()
              << aggregate.totalRecognizedFunctionBodies << '\n';
 
         std::size_t filePairCount = 0;
+        std::vector<CloneSummaryEntry> candidateDetails;
 
         for (std::size_t i = 0; i < analyzedFiles.size(); ++i)
         {
@@ -471,6 +492,22 @@ int runCloneScope()
                         secondRelativePath,
                         second.tokens,
                         matches);
+
+                    for (const Type1BodyMatch &match : matches)
+                    {
+                        if (!appendCloneSummaryEntry(
+                                candidateDetails,
+                                CloneCandidateKind::Type1,
+                                firstRelativePath,
+                                first.tokens,
+                                match.firstRegion,
+                                secondRelativePath,
+                                second.tokens,
+                                match.secondRegion))
+                        {
+                            cerr << "Warning: invalid Type-1 summary boundaries.\n";
+                        }
+                    }
                 }
 
                 std::vector<Type2BodyMatch> type2Matches =
@@ -494,6 +531,22 @@ int runCloneScope()
                         secondRelativePath,
                         second.tokens,
                         type2Matches);
+
+                    for (const Type2BodyMatch &match : type2Matches)
+                    {
+                        if (!appendCloneSummaryEntry(
+                                candidateDetails,
+                                CloneCandidateKind::Type2Only,
+                                firstRelativePath,
+                                first.tokens,
+                                match.firstRegion,
+                                secondRelativePath,
+                                second.tokens,
+                                match.secondRegion))
+                        {
+                            cerr << "Warning: invalid Type-2 summary boundaries.\n";
+                        }
+                    }
                 }
 
                 ++filePairCount;
@@ -512,8 +565,15 @@ int runCloneScope()
         cout << "Total Type-2-only body candidates: "
              << aggregate.type2OnlyCandidateCount << '\n';
 
-        cout << "Human review required; "
-             << "similarity is not proof of plagiarism.\n";
+        // Consolidate already computed evidence for human-readable reporting.
+        AnalysisReport report;
+        report.studentFolderCount = studentFileIndices.size();
+        report.comparedFilePairs = filePairCount;
+        report.aggregate = aggregate;
+        report.cloneCandidates = candidateDetails;
+        report.studentFindings = studentFindings;
+
+        printCombinedAnalysisReport(cout, report);
 
         return 0;
     }
