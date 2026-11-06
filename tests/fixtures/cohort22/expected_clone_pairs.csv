@@ -1,0 +1,21 @@
+first_file,second_file,expected_class,shared_algorithm,fixture_purpose
+student01/assignment3.cpp,student02/assignment3.cpp,Type-1,prime,Intentionally injected function-body matching; NOT a plagiarism accusation
+student01/assignment3.cpp,student17/assignment3.cpp,Type-1,prime,Intentionally injected function-body matching; NOT a plagiarism accusation
+student01/assignment3.cpp,student18/assignment3.cpp,Type-1,prime,Intentionally injected function-body matching; NOT a plagiarism accusation
+student01/assignment3.cpp,student19/assignment3.cpp,Type-1,prime,Intentionally injected function-body matching; NOT a plagiarism accusation
+student02/assignment3.cpp,student17/assignment3.cpp,Type-1,prime,Intentionally injected function-body matching; NOT a plagiarism accusation
+student02/assignment3.cpp,student18/assignment3.cpp,Type-1,prime,Intentionally injected function-body matching; NOT a plagiarism accusation
+student02/assignment3.cpp,student19/assignment3.cpp,Type-1,prime,Intentionally injected function-body matching; NOT a plagiarism accusation
+student17/assignment3.cpp,student18/assignment3.cpp,Type-1,prime,Intentionally injected function-body matching; NOT a plagiarism accusation
+student17/assignment3.cpp,student19/assignment3.cpp,Type-1,prime,Intentionally injected function-body matching; NOT a plagiarism accusation
+student18/assignment3.cpp,student19/assignment3.cpp,Type-1,prime,Intentionally injected function-body matching; NOT a plagiarism accusation
+student05/assignment3.cpp,student11/assignment3.cpp,Type-2-only,fibonacci,Intentionally injected function-body matching; NOT a plagiarism accusation
+student05/assignment3.cpp,student12/assignment3.cpp,Type-2-only,fibonacci,Intentionally injected function-body matching; NOT a plagiarism accusation
+student05/assignment3.cpp,student13/assignment3.cpp,Type-2-only,fibonacci,Intentionally injected function-body matching; NOT a plagiarism accusation
+student05/assignment3.cpp,student14/assignment3.cpp,Type-2-only,fibonacci,Intentionally injected function-body matching; NOT a plagiarism accusation
+student11/assignment3.cpp,student12/assignment3.cpp,Type-2-only,fibonacci,Intentionally injected function-body matching; NOT a plagiarism accusation
+student11/assignment3.cpp,student13/assignment3.cpp,Type-2-only,fibonacci,Intentionally injected function-body matching; NOT a plagiarism accusation
+student11/assignment3.cpp,student14/assignment3.cpp,Type-2-only,fibonacci,Intentionally injected function-body matching; NOT a plagiarism accusation
+student12/assignment3.cpp,student13/assignment3.cpp,Type-2-only,fibonacci,Intentionally injected function-body matching; NOT a plagiarism accusation
+student12/assignment3.cpp,student14/assignment3.cpp,Type-2-only,fibonacci,Intentionally injected function-body matching; NOT a plagiarism accusation
+student13/assignment3.cpp,student14/assignment3.cpp,Type-2-only,fibonacci,Intentionally injected function-body matching; NOT a plagiarism accusation

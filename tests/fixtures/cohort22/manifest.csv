@@ -1,0 +1,67 @@
+student_id,assignment_number,relative_file,assignment_brief,algorithms,naming_style,nonblank_lines,commented_lines,comment_mode,injected_clone_group
+student01,1,student01/assignment1.cpp,"Number theory: bounded factorial, GCD, and integer palindrome",factorial; gcd; palindrome,camelCase,93,28,commented,none
+student01,2,student01/assignment2.cpp,Array processing: selection sort followed by binary search,selection_sort; binary_search,camelCase,90,27,commented,none
+student01,3,student01/assignment3.cpp,"Math toolkit: primality, iterative Fibonacci, complex addition",prime; fibonacci; complex_addition,snake_case,111,33,commented,T1-A:prime
+student02,1,student02/assignment1.cpp,"Number theory: bounded factorial, GCD, and integer palindrome",factorial; gcd; palindrome,snake_case,116,35,commented,none
+student02,2,student02/assignment2.cpp,Array processing: selection sort followed by binary search,selection_sort; binary_search,snake_case,92,28,commented,none
+student02,3,student02/assignment3.cpp,"Math toolkit: primality, iterative Fibonacci, complex addition",prime; fibonacci; complex_addition,snake_case,107,32,commented,T1-A:prime
+student03,1,student03/assignment1.cpp,"Number theory: bounded factorial, GCD, and integer palindrome",factorial; gcd; palindrome,camelCase,93,28,commented,none
+student03,2,student03/assignment2.cpp,Array processing: selection sort followed by binary search,selection_sort; binary_search,camelCase,90,27,commented,none
+student03,3,student03/assignment3.cpp,"Math toolkit: primality, iterative Fibonacci, complex addition",prime; fibonacci; complex_addition,camelCase,113,34,commented,none
+student04,1,student04/assignment1.cpp,"Number theory: bounded factorial, GCD, and integer palindrome",factorial; gcd; palindrome,camelCase,116,35,commented,none
+student04,2,student04/assignment2.cpp,Array processing: selection sort followed by binary search,selection_sort; binary_search,camelCase,92,28,commented,none
+student04,3,student04/assignment3.cpp,"Math toolkit: primality, iterative Fibonacci, complex addition",prime; fibonacci; complex_addition,camelCase,107,32,commented,none
+student05,1,student05/assignment1.cpp,"Number theory: bounded factorial, GCD, and integer palindrome",factorial; gcd; palindrome,camelCase,93,28,commented,none
+student05,2,student05/assignment2.cpp,Array processing: selection sort followed by binary search,selection_sort; binary_search,camelCase,90,27,commented,none
+student05,3,student05/assignment3.cpp,"Math toolkit: primality, iterative Fibonacci, complex addition",prime; fibonacci; complex_addition,snake_case,113,0,none,T2-B:fibonacci
+student06,1,student06/assignment1.cpp,"Number theory: bounded factorial, GCD, and integer palindrome",factorial; gcd; palindrome,camelCase,116,35,commented,none
+student06,2,student06/assignment2.cpp,Array processing: selection sort followed by binary search,selection_sort; binary_search,camelCase,92,28,commented,none
+student06,3,student06/assignment3.cpp,"Math toolkit: primality, iterative Fibonacci, complex addition",prime; fibonacci; complex_addition,camelCase,107,32,commented,none
+student07,1,student07/assignment1.cpp,"Number theory: bounded factorial, GCD, and integer palindrome",factorial; gcd; palindrome,camelCase,93,28,commented,none
+student07,2,student07/assignment2.cpp,Array processing: selection sort followed by binary search,selection_sort; binary_search,camelCase,90,27,commented,none
+student07,3,student07/assignment3.cpp,"Math toolkit: primality, iterative Fibonacci, complex addition",prime; fibonacci; complex_addition,camelCase,113,34,commented,none
+student08,1,student08/assignment1.cpp,"Number theory: bounded factorial, GCD, and integer palindrome",factorial; gcd; palindrome,camelCase,116,35,commented,none
+student08,2,student08/assignment2.cpp,Array processing: selection sort followed by binary search,selection_sort; binary_search,camelCase,92,28,commented,none
+student08,3,student08/assignment3.cpp,"Math toolkit: primality, iterative Fibonacci, complex addition",prime; fibonacci; complex_addition,camelCase,107,32,commented,none
+student09,1,student09/assignment1.cpp,"Number theory: bounded factorial, GCD, and integer palindrome",factorial; gcd; palindrome,PascalCase,93,28,commented,none
+student09,2,student09/assignment2.cpp,Array processing: selection sort followed by binary search,selection_sort; binary_search,PascalCase,90,27,commented,none
+student09,3,student09/assignment3.cpp,"Math toolkit: primality, iterative Fibonacci, complex addition",prime; fibonacci; complex_addition,snake_case,113,0,none,none
+student10,1,student10/assignment1.cpp,"Number theory: bounded factorial, GCD, and integer palindrome",factorial; gcd; palindrome,camelCase,116,35,commented,none
+student10,2,student10/assignment2.cpp,Array processing: selection sort followed by binary search,selection_sort; binary_search,camelCase,92,28,commented,none
+student10,3,student10/assignment3.cpp,"Math toolkit: primality, iterative Fibonacci, complex addition",prime; fibonacci; complex_addition,camelCase,107,32,commented,none
+student11,1,student11/assignment1.cpp,"Number theory: bounded factorial, GCD, and integer palindrome",factorial; gcd; palindrome,snake_case,93,28,commented,none
+student11,2,student11/assignment2.cpp,Array processing: selection sort followed by binary search,selection_sort; binary_search,snake_case,90,27,commented,none
+student11,3,student11/assignment3.cpp,"Math toolkit: primality, iterative Fibonacci, complex addition",prime; fibonacci; complex_addition,snake_case,113,34,commented,T2-B:fibonacci
+student12,1,student12/assignment1.cpp,"Number theory: bounded factorial, GCD, and integer palindrome",factorial; gcd; palindrome,snake_case,116,35,commented,none
+student12,2,student12/assignment2.cpp,Array processing: selection sort followed by binary search,selection_sort; binary_search,snake_case,92,28,commented,none
+student12,3,student12/assignment3.cpp,"Math toolkit: primality, iterative Fibonacci, complex addition",prime; fibonacci; complex_addition,snake_case,115,34,commented,T2-B:fibonacci
+student13,1,student13/assignment1.cpp,"Number theory: bounded factorial, GCD, and integer palindrome",factorial; gcd; palindrome,snake_case,93,28,commented,none
+student13,2,student13/assignment2.cpp,Array processing: selection sort followed by binary search,selection_sort; binary_search,snake_case,90,27,commented,none
+student13,3,student13/assignment3.cpp,"Math toolkit: primality, iterative Fibonacci, complex addition",prime; fibonacci; complex_addition,snake_case,113,34,commented,T2-B:fibonacci
+student14,1,student14/assignment1.cpp,"Number theory: bounded factorial, GCD, and integer palindrome",factorial; gcd; palindrome,snake_case,116,35,commented,none
+student14,2,student14/assignment2.cpp,Array processing: selection sort followed by binary search,selection_sort; binary_search,snake_case,92,28,commented,none
+student14,3,student14/assignment3.cpp,"Math toolkit: primality, iterative Fibonacci, complex addition",prime; fibonacci; complex_addition,snake_case,115,34,commented,T2-B:fibonacci
+student15,1,student15/assignment1.cpp,"Number theory: bounded factorial, GCD, and integer palindrome",factorial; gcd; palindrome,camelCase,93,0,none,none
+student15,2,student15/assignment2.cpp,Array processing: selection sort followed by binary search,selection_sort; binary_search,snake_case,90,27,commented,none
+student15,3,student15/assignment3.cpp,"Math toolkit: primality, iterative Fibonacci, complex addition",prime; fibonacci; complex_addition,snake_case,113,34,commented,none
+student16,1,student16/assignment1.cpp,"Number theory: bounded factorial, GCD, and integer palindrome",factorial; gcd; palindrome,camelCase,116,0,none,none
+student16,2,student16/assignment2.cpp,Array processing: selection sort followed by binary search,selection_sort; binary_search,camelCase,92,0,none,none
+student16,3,student16/assignment3.cpp,"Math toolkit: primality, iterative Fibonacci, complex addition",prime; fibonacci; complex_addition,camelCase,107,0,none,none
+student17,1,student17/assignment1.cpp,"Number theory: bounded factorial, GCD, and integer palindrome",factorial; gcd; palindrome,snake_case,93,28,commented,none
+student17,2,student17/assignment2.cpp,Array processing: selection sort followed by binary search,selection_sort; binary_search,snake_case,90,27,commented,none
+student17,3,student17/assignment3.cpp,"Math toolkit: primality, iterative Fibonacci, complex addition",prime; fibonacci; complex_addition,snake_case,111,33,commented,T1-A:prime
+student18,1,student18/assignment1.cpp,"Number theory: bounded factorial, GCD, and integer palindrome",factorial; gcd; palindrome,snake_case,116,35,commented,none
+student18,2,student18/assignment2.cpp,Array processing: selection sort followed by binary search,selection_sort; binary_search,snake_case,92,28,commented,none
+student18,3,student18/assignment3.cpp,"Math toolkit: primality, iterative Fibonacci, complex addition",prime; fibonacci; complex_addition,snake_case,107,32,commented,T1-A:prime
+student19,1,student19/assignment1.cpp,"Number theory: bounded factorial, GCD, and integer palindrome",factorial; gcd; palindrome,snake_case,93,28,commented,none
+student19,2,student19/assignment2.cpp,Array processing: selection sort followed by binary search,selection_sort; binary_search,snake_case,90,27,commented,none
+student19,3,student19/assignment3.cpp,"Math toolkit: primality, iterative Fibonacci, complex addition",prime; fibonacci; complex_addition,snake_case,111,33,commented,T1-A:prime
+student20,1,student20/assignment1.cpp,"Number theory: bounded factorial, GCD, and integer palindrome",factorial; gcd; palindrome,camelCase,116,0,none,none
+student20,2,student20/assignment2.cpp,Array processing: selection sort followed by binary search,selection_sort; binary_search,camelCase,92,0,none,none
+student20,3,student20/assignment3.cpp,"Math toolkit: primality, iterative Fibonacci, complex addition",prime; fibonacci; complex_addition,camelCase,107,32,commented,none
+student21,1,student21/assignment1.cpp,"Number theory: bounded factorial, GCD, and integer palindrome",factorial; gcd; palindrome,camelCase,93,28,commented,none
+student21,2,student21/assignment2.cpp,Array processing: selection sort followed by binary search,selection_sort; binary_search,camelCase,90,27,commented,none
+student21,3,student21/assignment3.cpp,"Math toolkit: primality, iterative Fibonacci, complex addition",prime; fibonacci; complex_addition,camelCase,113,34,commented,none
+student22,1,student22/assignment1.cpp,"Number theory: bounded factorial, GCD, and integer palindrome",factorial; gcd; palindrome,snake_case,116,35,commented,none
+student22,2,student22/assignment2.cpp,Array processing: selection sort followed by binary search,selection_sort; binary_search,snake_case,92,28,commented,none
+student22,3,student22/assignment3.cpp,"Math toolkit: primality, iterative Fibonacci, complex addition",prime; fibonacci; complex_addition,snake_case,107,32,commented,none

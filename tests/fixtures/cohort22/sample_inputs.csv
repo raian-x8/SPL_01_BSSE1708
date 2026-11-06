@@ -1,0 +1,4 @@
+assignment_number,standard_input,expected_features
+1,5 42 30 1221\n,factorial; GCD; palindrome
+2,9 2 7 1 5 3 7\n,sorted array; search index
+3,29 12 3 4 5 -2\n,prime; Fibonacci; complex addition
