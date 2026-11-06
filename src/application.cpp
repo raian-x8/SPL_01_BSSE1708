@@ -35,6 +35,8 @@
 
 #include "comment_history.hpp"
 
+#include "assignment_order.hpp"
+
 #include <vector>
 
 #include <map>
@@ -268,15 +270,38 @@ int runCloneScope()
                 continue;
             }
 
-            // Order the files by their assignment filenames.
-            std::sort(
-                fileIndices.begin(),
-                fileIndices.end(),
-                [&analyzedFiles](std::size_t first, std::size_t second)
-                {
-                    return analyzedFiles[first].path.filename().string() <
-                           analyzedFiles[second].path.filename().string();
-                });
+            // Collect filenames for numeric assignment ordering.
+            std::vector<std::string> filenames;
+
+            for (std::size_t index : fileIndices)
+            {
+                filenames.push_back(
+                    analyzedFiles[index].path.filename().string());
+            }
+
+            // Validate filenames and determine chronological order.
+            const AssignmentOrderResult assignmentOrder =
+                determineAssignmentOrder(filenames);
+
+            // Avoid historical comparisons when assignment order is uncertain.
+            if (!assignmentOrder.valid)
+            {
+                cout << "Student: " << student.first
+                     << " | Historical analysis skipped: "
+                     << assignmentOrder.reason << '\n';
+
+                continue;
+            }
+
+            // Translate the ordered positions back to analyzed-file indices.
+            std::vector<std::size_t> orderedFileIndices;
+
+            for (std::size_t position : assignmentOrder.orderedPositions)
+            {
+                orderedFileIndices.push_back(fileIndices[position]);
+            }
+
+            fileIndices = orderedFileIndices;
 
             // Collect statistics from all preceding assignments.
             std::vector<IdentifierStyleStatistics> historicalFiles;
