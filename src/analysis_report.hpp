@@ -4,6 +4,8 @@
 #include <ostream>
 #include <string>
 #include <vector>
+#include <map>
+#include <set>
 
 #include "clone_summary.hpp"
 #include "source_statistics.hpp"
@@ -30,6 +32,13 @@ struct AnalysisReport
     std::vector<CloneSummaryEntry> cloneCandidates;
     std::vector<StudentStyleFinding> studentFindings;
 };
+
+// Shared collection of student-wise human-review reasons.
+using HumanReviewIndicators =
+    std::map<std::string, std::set<std::string>>;
+
+HumanReviewIndicators collectHumanReviewIndicators(
+    const AnalysisReport &report);
 
 void printCombinedAnalysisReport(
     std::ostream &output,
