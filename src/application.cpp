@@ -29,6 +29,8 @@
 
 #include "analysis_report.hpp"
 
+#include "report_file_export.hpp"
+
 #include "source_statistics.hpp"
 
 #include "identifier_style.hpp"
@@ -574,6 +576,34 @@ int runCloneScope()
         report.studentFindings = studentFindings;
 
         printCombinedAnalysisReport(cout, report);
+
+        // Export the already-computed analysis results.
+        fs::path exportDirectory;
+        std::string exportError;
+
+        if (!exportAnalysisReportFiles(
+                report,
+                "clonescope_reports",
+                exportDirectory,
+                exportError))
+        {
+            cerr << "\nError: CSV/JSON report export failed.\n";
+            cerr << exportError << '\n';
+
+            return 1;
+        }
+
+        cout << "\n========================================\n";
+        cout << "CSV/JSON REPORT EXPORT COMPLETE\n";
+        cout << "========================================\n";
+
+        cout << "Output folder: "
+             << fs::absolute(exportDirectory).string() << '\n';
+
+        cout << "Saved: analysis_overview.csv\n";
+        cout << "Saved: clone_candidates.csv\n";
+        cout << "Saved: student_findings.csv\n";
+        cout << "Saved: analysis_report.json\n";
 
         return 0;
     }

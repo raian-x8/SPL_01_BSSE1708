@@ -38,22 +38,25 @@ The supervisor-approved direction includes:
 - Explainable source-location evidence and human-review reports.
 - CSV/JSON data export.
 
-**Only the features identified as implemented below are currently available.** Type-3, restricted Type-4 and CSV/JSON export are **not yet implemented**. Statistical stylometry, historical comparisons and consolidated console reporting are implemented prototypes, not authorship classifiers.
+**Only the features identified as implemented below are currently available.** Type-1 and restricted Type-2-only body-level candidate detection, statistical stylometry, historical comparisons, consolidated console reporting, and CSV/JSON report export are implemented and tested. Type-3 and restricted Type-4 detection remain future work after the midterm. CloneScope is an explainable prototype, not an automatic plagiarism detector or authorship classifier.
 
 ## Current Development Status
 
-| Item | Status as of 7 November 2026 |
-| --- | --- |
-| Application, preprocessing, tokenization, function-body detection | Implemented and tested |
-| Type-1 and restricted Type-2-only body candidate detection | Implemented and tested |
-| Source-line and function statistics | Implemented and tested |
-| Identifier-style and commenting-style statistics | Implemented and tested |
-| Student-wise naming and commenting history | Implemented with evidence thresholds and numerical assignment ordering |
-| Detailed body-pair locations and combined console analysis report | Implemented and integration-tested |
-| Controlled classroom dataset | 22 synthetic students, 3 assignments each, 66 C++17 files |
-| Current feature branch | `feat/statistical-stylometric-analysis`, pushed; PR review and merge pending |
-| CSV/JSON findings export | Next feature, not implemented |
-| Type-3 and restricted Type-4 detection | Future work after the midterm |
+| Item                                                              | Status as of 8 November 2026                                                   |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Application, preprocessing, tokenization, function-body detection | Implemented and tested                                                         |
+| Type-1 and restricted Type-2-only body candidate detection        | Implemented and tested                                                         |
+| Source-line and function statistics                               | Implemented and tested                                                         |
+| Identifier-style and commenting-style statistics                  | Implemented and tested                                                         |
+| Student-wise naming and commenting history                        | Implemented with evidence thresholds and numerical assignment ordering         |
+| Detailed body-pair locations and combined console analysis report | Implemented and integration-tested                                             |
+| Controlled classroom dataset                                      | 22 synthetic students, 3 assignments each, 66 C++17 files                      |
+| CSV report serialization                                          | Implemented and tested                                                         |
+| JSON report serialization                                         | Implemented and tested                                                         |
+| Physical CSV/JSON report generation                               | Implemented and integration-tested; four files saved in a unique run directory |
+| Complete smoke-test regression                                    | 28 of 28 test executables passed                                               |
+| Current feature branch                                            | `feat/csv-json-report-export`, pushed; PR review and merge pending             |
+| Type-3 and restricted Type-4 detection                            | Future work after the midterm                                                  |
 
 **Historical Phase 3 commits (retained for development history):**
 
@@ -62,6 +65,982 @@ The supervisor-approved direction includes:
 - `2c6e033` — `test: add Type-2 reporting and invalid-region regression checks`
 
 The older Type-2 implementation details later in this README are preserved as a historical Phase 3 technical explanation. The status table above describes the newer pre-midterm feature milestone. A feature branch is not considered merged until its Pull Request has been reviewed and merged.
+
+## CloneScope Midterm Demonstration and Project Architecture
+
+This section provides a practical overview of CloneScope's implemented
+pre-midterm functionality, architecture, repository organization,
+execution workflow, and verified results.
+
+The detailed technical explanations and chronological development history
+in the following sections are preserved.
+
+### 1. What CloneScope Does
+
+CloneScope is an explainable C++17 code clone tagging and statistical
+stylometric analysis tool designed for student programming submissions.
+
+The application analyzes supported C/C++ source files and identifies
+code-similarity candidates that may deserve further human inspection.
+
+Its current capabilities include:
+
+- Type-1 function-body clone candidate detection.
+- Restricted Type-2-only function-body clone candidate detection.
+- Source code preprocessing and tokenization.
+- Supported function-body recognition.
+- Source-line, token, and function-body statistics.
+- Identifier naming-style analysis.
+- Commenting-style analysis.
+- Historical student programming-style comparisons.
+- Student-wise human-review indicators.
+- Detailed candidate source-file paths and line ranges.
+- Combined terminal analysis reports.
+- CSV and JSON report generation.
+
+CloneScope does not automatically determine plagiarism.
+
+Similarity and programming-style deviations are indicators for human
+review, not proof of academic misconduct.
+
+Type-3 and restricted Type-4 clone detection remain future work
+after the midterm.
+
+### 2. System Architecture
+
+The application follows a modular analysis and reporting pipeline.
+
+```mermaid
+flowchart TD
+    A["Student C/C++ Source Files"]
+    B["Directory Discovery"]
+    C["Preprocessing and Tokenization"]
+    D["Function-Body Recognition"]
+    E["Type-1 and Type-2 Clone Detection"]
+    F["Source and Style Statistics"]
+    G["Historical Student Analysis"]
+    H["AnalysisReport"]
+    I["Console Analysis Report"]
+    J["CSV and JSON Serializers"]
+    K["Report File Exporter"]
+    L["Four Generated Report Files"]
+
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    C --> F
+    F --> G
+    E --> H
+    F --> H
+    G --> H
+    H --> I
+    H --> J
+    J --> K
+    K --> L
+```
+
+The architecture separates three major responsibilities:
+
+1. **Analysis:** Read source code, identify supported function bodies,
+   detect clone candidates, and calculate statistical evidence.
+
+2. **Reporting:** Collect completed findings into an `AnalysisReport`
+   and present them as understandable results.
+
+3. **Exporting:** Serialize the existing findings into CSV and JSON
+   files without repeating clone detection or stylometric analysis.
+
+This separation makes the project easier to test, maintain, and extend.
+
+### 3. Project Repository Structure
+
+The following diagram groups related components for readability.
+Files represented as `module.*` generally have corresponding
+`.hpp` and `.cpp` files.
+
+```text
+SPL_01_BSSE1708/
+|
+|-- src/
+|   |
+|   |-- main.cpp
+|   |-- application.hpp
+|   |-- application.cpp
+|   |
+|   |-- preprocessor.*
+|   |-- tokenizer.*
+|   |-- code_region.*
+|   |-- function_region.*
+|   |
+|   |-- type1_clone.*
+|   |-- type1_report.*
+|   |-- type2_clone.*
+|   |-- type2_report.*
+|   |
+|   |-- source_statistics.*
+|   |-- identifier_style.*
+|   |-- identifier_history.*
+|   |-- comment_style.*
+|   |-- comment_history.*
+|   |-- assignment_order.*
+|   |
+|   |-- clone_summary.*
+|   |-- analysis_report.*
+|   |
+|   |-- csv_export.*
+|   |-- json_export.*
+|   |-- report_file_export.*
+|
+|-- tests/
+|   |
+|   |-- fixtures/
+|   |   |-- cohort22/
+|   |   `-- other controlled test fixtures/
+|   |
+|   |-- analysis_report_smoke.cpp
+|   |-- csv_export_smoke.cpp
+|   |-- csv_overview_smoke.cpp
+|   |-- csv_candidates_smoke.cpp
+|   |-- csv_student_findings_smoke.cpp
+|   |-- json_string_smoke.cpp
+|   |-- json_summary_smoke.cpp
+|   |-- json_candidates_smoke.cpp
+|   |-- json_student_findings_smoke.cpp
+|   |-- json_report_structure_smoke.cpp
+|   |-- review_indicators_smoke.cpp
+|   |-- report_file_export_smoke.cpp
+|   `-- other Phase 1-4 smoke tests/
+|
+|-- docs/
+|   `-- learning-notes/
+|       |-- Phase 1-4 learning manuals
+|       `-- Phase 5 technical learning manual
+|
+|-- samples/
+|-- Document/
+|
+|-- .gitignore
+|-- README.md
+|
+`-- clonescope_reports/   (generated locally; Git-ignored)
+```
+
+The `src` directory contains the application implementation.
+
+The `tests` directory contains focused regression tests and
+controlled source-code datasets.
+
+The `docs/learning-notes` directory preserves the technical
+learning manuals created throughout development.
+
+The `clonescope_reports` directory is generated when a directory
+analysis completes successfully. It is excluded from Git commits.
+
+### 4. Main Source Modules and Responsibilities
+
+| Component              | Responsibility                                           |
+| ---------------------- | -------------------------------------------------------- |
+| `main.cpp`             | Application entry point                                  |
+| `application.cpp`      | User interaction and overall analysis coordination       |
+| `preprocessor.*`       | Supported source-code comment removal                    |
+| `tokenizer.*`          | Lexical token construction and source positions          |
+| `code_region.*`        | Matched code-block region identification                 |
+| `function_region.*`    | Supported function-body recognition                      |
+| `type1_clone.*`        | Type-1 body-level candidate matching                     |
+| `type1_report.*`       | Explainable Type-1 reporting                             |
+| `type2_clone.*`        | Consistent identifier-renaming candidate matching        |
+| `type2_report.*`       | Explainable Type-2-only reporting                        |
+| `source_statistics.*`  | Source-line, blank-line, token, and function statistics  |
+| `identifier_style.*`   | Identifier naming-convention classification              |
+| `identifier_history.*` | Historical naming-style comparison                       |
+| `comment_style.*`      | Source-code commenting statistics                        |
+| `comment_history.*`    | Historical commenting-style comparison                   |
+| `assignment_order.*`   | Numeric assignment ordering and validation               |
+| `clone_summary.*`      | Candidate source paths, classifications, and line ranges |
+| `analysis_report.*`    | Combined analysis data and human-review reporting        |
+| `csv_export.*`         | CSV serialization of analysis findings                   |
+| `json_export.*`        | JSON serialization of analysis findings                  |
+| `report_file_export.*` | Physical report-file generation and directory management |
+
+### 5. Important Report Export Functions
+
+Phase 5 introduced reusable serialization and file-export functions.
+
+| Function                           | Purpose                                                         |
+| ---------------------------------- | --------------------------------------------------------------- |
+| `escapeCsvField()`                 | Correctly quotes supported special characters in CSV fields     |
+| `writeAnalysisOverviewCsv()`       | Writes the overall dataset statistics                           |
+| `writeCloneCandidatesCsv()`        | Writes detailed clone candidate records                         |
+| `writeStudentFindingsCsv()`        | Writes student-wise stylometric findings                        |
+| `writeJsonString()`                | Escapes strings for valid JSON output                           |
+| `writeJsonSummary()`               | Writes the structured dataset and statistical summary           |
+| `writeJsonCloneCandidates()`       | Writes the JSON clone candidate array                           |
+| `writeJsonStudentFindings()`       | Writes student-wise JSON finding records                        |
+| `writeJsonHumanReviewIndicators()` | Writes students and their review reasons                        |
+| `writeAnalysisReportJson()`        | Combines all JSON report sections                               |
+| `collectHumanReviewIndicators()`   | Collects distinct student-wise review reasons                   |
+| `exportAnalysisReportFiles()`      | Creates a unique run directory and writes all four report files |
+
+These functions operate on the results already computed by the
+application. They do not independently rerun clone detection.
+
+### 6. Build and Run CloneScope
+
+CloneScope is implemented using C++17.
+
+The following commands are intended for Windows PowerShell,
+executed from the repository root.
+
+#### Compile the application
+
+```powershell
+$sourceFiles = Get-ChildItem .\src -Filter *.cpp | Select-Object -ExpandProperty FullName
+
+g++ -std=c++17 -Wall -Wextra -pedantic $sourceFiles -o .\clonescope.exe
+
+$LASTEXITCODE
+```
+
+An exit code of `0` indicates successful compilation.
+
+#### Analyze the controlled 22-student dataset
+
+```powershell
+@(".\tests\fixtures\cohort22", "y") | .\clonescope.exe > .\clonescope_integration.log
+
+$LASTEXITCODE
+```
+
+The application analyzes the controlled student submissions and
+generates a combined report.
+
+#### Inspect the final execution output
+
+```powershell
+Get-Content .\clonescope_integration.log -Tail 25
+```
+
+After successful directory analysis, the program displays a report
+export confirmation.
+
+### 7. Generated CSV and JSON Reports
+
+CloneScope automatically creates a new directory for every
+successful report export.
+
+Example:
+
+```text
+clonescope_reports/
+|
+|-- run_1/
+|   |-- analysis_overview.csv
+|   |-- clone_candidates.csv
+|   |-- student_findings.csv
+|   `-- analysis_report.json
+|
+|-- run_2/
+|   |-- analysis_overview.csv
+|   |-- clone_candidates.csv
+|   |-- student_findings.csv
+|   `-- analysis_report.json
+|
+`-- ...
+```
+
+Existing run directories are preserved.
+
+The export module searches for the next available directory name,
+up to its configured limit.
+
+#### Report file descriptions
+
+| File                    | Contents                                                              |
+| ----------------------- | --------------------------------------------------------------------- |
+| `analysis_overview.csv` | Dataset, source-code, and clone-detection statistics                  |
+| `clone_candidates.csv`  | Candidate type, participating students, source paths, and line ranges |
+| `student_findings.csv`  | Student naming and commenting-style evaluation results                |
+| `analysis_report.json`  | Complete structured report, including human-review indicators         |
+
+### 8. Example CSV Output
+
+The following values come from the controlled 22-student
+integration dataset.
+
+**analysis_overview.csv**
+
+```csv
+metric,value
+student_folders,22
+source_files,66
+compared_file_pairs,2145
+total_source_lines,6973
+blank_source_lines,242
+total_tokens,30995
+recognized_function_bodies,242
+type1_candidate_pairs,10
+type2_only_candidate_pairs,10
+```
+
+These values describe the analyzed dataset and reported
+candidate counts.
+
+They are not measurements of plagiarism-detection accuracy.
+
+### 9. Example JSON Output
+
+The JSON report organizes findings into nested objects and arrays.
+
+The following is an abbreviated illustration of verified
+cohort statistics; the complete generated report contains
+additional fields and arrays.
+
+```json
+{
+  "summary": {
+    "dataset_overview": {
+      "student_folders": 22,
+      "source_files": 66,
+      "compared_file_pairs": 2145
+    },
+    "clone_detection": {
+      "type1_candidate_pairs": 10,
+      "type2_only_candidate_pairs": 10,
+      "total_candidate_pairs": 20
+    }
+  },
+  "human_review_indicators": {
+    "student_count": 12
+  }
+}
+```
+
+The complete JSON report also includes:
+
+- Tool name and format version.
+- Source-code statistics.
+- Clone candidate classifications.
+- Both source locations for each candidate.
+- Student naming and commenting-style findings.
+- Student-wise human-review reasons.
+- An explicit interpretation warning.
+
+CSV is convenient for tabular data inspection.
+
+JSON is useful when another program needs structured,
+nested analysis results.
+
+### 10. Finding the Latest Generated Report
+
+Use the following PowerShell commands after running CloneScope.
+
+```powershell
+$latestRun = Get-ChildItem .\clonescope_reports -Directory |
+    Where-Object { $_.Name -match '^run_\d+$' } |
+    Sort-Object { [int]($_.Name -replace '^run_', '') } -Descending |
+    Select-Object -First 1
+
+$latestRun.FullName
+```
+
+Open the generated files in VS Code:
+
+```powershell
+code -r (Join-Path $latestRun.FullName "analysis_overview.csv")
+
+code -r (Join-Path $latestRun.FullName "clone_candidates.csv")
+
+code -r (Join-Path $latestRun.FullName "student_findings.csv")
+
+code -r (Join-Path $latestRun.FullName "analysis_report.json")
+```
+
+Parse the JSON report:
+
+```powershell
+$report = Get-Content -Raw (Join-Path $latestRun.FullName "analysis_report.json") | ConvertFrom-Json -ErrorAction Stop
+
+$report.summary.dataset_overview | Format-List
+
+$report.summary.clone_detection | Format-List
+
+$report.human_review_indicators.student_count
+```
+
+The verified cohort integration reported 22 students,
+66 source files, 20 clone candidate pairs, and 12 distinct
+students with at least one human-review indicator.
+
+### 11. Final Pre-Midterm Testing and Verification
+
+CloneScope underwent focused module testing and
+application-level integration testing.
+
+**Recorded verification results:**
+
+| Verification item                      | Result                        |
+| -------------------------------------- | ----------------------------- |
+| C++17 application compilation          | PASS                          |
+| Full smoke-test regression             | 28/28 test executables passed |
+| Controlled student folders             | 22                            |
+| Controlled source files                | 66                            |
+| Source-file pairs compared             | 2,145                         |
+| Type-1 body-level candidate pairs      | 10                            |
+| Type-2-only body-level candidate pairs | 10                            |
+| Total body-level candidate pairs       | 20                            |
+| Student finding records                | 22                            |
+| Students with human-review indicators  | 12                            |
+| CSV report file generation             | PASS                          |
+| JSON report file generation            | PASS                          |
+| JSON parsing through PowerShell        | PASS                          |
+| Repeated export directory preservation | PASS                          |
+
+The regression covers preprocessing, tokenization,
+function-body recognition, clone detection, source statistics,
+stylometric analysis, combined reporting, serialization,
+and filesystem export functionality.
+
+The verification was performed on controlled test inputs.
+
+Passing tests confirm the tested behavior; they do not
+establish perfect detection accuracy on real submissions.
+
+### 12. Technical Learning Documentation
+
+CloneScope's development is supported by detailed
+technical learning manuals covering its major phases.
+
+The manuals explain algorithms, implementation decisions,
+C++ syntax, test procedures, source-code functionality,
+limitations, and viva preparation.
+
+The Phase 5 manual is available at:
+
+[CloneScope Phase 5 - CSV/JSON Export Full Technical Learning Manual](docs/learning-notes/CloneScope_Phase5_CSV_JSON_Export_Full_Technical_Learning_Manual.pdf)
+
+Earlier learning manuals are preserved in the same directory.
+
+### 13. Academic Interpretation
+
+CloneScope is an explainable prototype.
+
+A Type-1 or Type-2-only candidate does not automatically
+establish copying.
+
+A change in naming or commenting style does not automatically
+establish a change in authorship.
+
+All findings require contextual human interpretation.
+
+**Human review required; similarity is not proof of plagiarism.**
+
+---
+
+## Chronological Midterm Viva Demonstration
+
+This section provides a reproducible, chronological demonstration of
+CloneScope's development from its original source-file processing
+pipeline to its current CSV/JSON reporting functionality.
+
+The commands use Windows PowerShell and C++17.
+
+All commands should be executed from the repository root:
+
+`C:\Users\raian\Developer\SPL_01_BSSE1708`
+
+The demonstration is divided into two parts:
+
+1. Preparation before the viva.
+2. Chronological demonstration during the viva.
+
+### Part A: Preparation Before the Viva
+
+The following preparation should be completed before the presentation
+so compilation does not consume demonstration time.
+
+#### A1. Verify the repository
+
+```powershell
+git status --short --branch
+
+git log -1 --oneline --decorate
+```
+
+#### A2. Compile CloneScope
+
+```powershell
+$sourceFiles = Get-ChildItem .\src -Filter *.cpp |
+    Select-Object -ExpandProperty FullName
+
+g++ -std=c++17 -Wall -Wextra -pedantic $sourceFiles -o .\clonescope.exe
+
+if ($LASTEXITCODE -ne 0) {
+    throw "CloneScope compilation failed."
+}
+```
+
+#### A3. Compile the smoke-test executables
+
+Create a temporary build directory:
+
+```powershell
+$regressionDir = ".\build\regression"
+
+New-Item -ItemType Directory -Path $regressionDir -Force |
+    Out-Null
+```
+
+Compile the reusable modules:
+
+```powershell
+$moduleSources = @(
+    Get-ChildItem .\src -Filter "*.cpp" |
+    Where-Object {
+        $_.Name -notin @("main.cpp", "application.cpp")
+    } |
+    Sort-Object Name
+)
+
+$objects = @()
+
+foreach ($source in $moduleSources) {
+    $object = Join-Path $regressionDir ($source.BaseName + ".o")
+
+    g++ -std=c++17 -Wall -Wextra -pedantic -c $source.FullName -o $object
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Module compilation failed: $($source.Name)"
+    }
+
+    $objects += $object
+}
+```
+
+Compile the individual smoke tests:
+
+```powershell
+$tests = @(
+    Get-ChildItem .\tests -Filter "*_smoke.cpp" |
+    Sort-Object Name
+)
+
+foreach ($test in $tests) {
+    $exe = Join-Path $regressionDir ($test.BaseName + ".exe")
+
+    g++ -std=c++17 -Wall -Wextra -pedantic $test.FullName $objects -o $exe
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Test compilation failed: $($test.Name)"
+    }
+}
+
+Write-Host "Smoke-test executables prepared: $($tests.Count)"
+```
+
+The preparation creates executables inside `build/regression/`.
+
+These generated files are excluded from Git commits.
+
+The preparation should only be repeated if source code changes
+or the generated executables are unavailable.
+
+### Part B: Chronological Development History
+
+Before running the application, display how the source code
+developed over time.
+
+#### B1. Show recent Git history
+
+```powershell
+git log --graph --oneline --decorate --all -20
+```
+
+#### B2. Show development commits in chronological order
+
+```powershell
+git log --all --reverse --date=short --pretty=format:"%ad | %h | %s" --grep="feat:" --grep="test:" --grep="docs:"
+```
+
+This helps demonstrate:
+
+- Feature implementation over time.
+- Regression testing milestones.
+- Documentation milestones.
+- The progression from preprocessing to report generation.
+
+The Git history is evidence of recorded repository development,
+not an automatic measurement of the number of hours worked.
+
+### Part C: Phase 1 - Source Processing
+
+**Development objective:** Read C/C++ source files, remove supported
+comments, and convert source text into lexical tokens.
+
+#### C1. Demonstrate preprocessing
+
+```powershell
+.\build\regression\preprocessor_smoke.exe
+```
+
+#### C2. Demonstrate tokenization
+
+```powershell
+.\build\regression\tokenizer_smoke.exe
+```
+
+#### C3. Demonstrate the original file-processing pipeline
+
+```powershell
+.\build\regression\pipeline_smoke.exe
+```
+
+#### C4. Run CloneScope on a single source file
+
+```powershell
+".\samples\hello.c" | .\clonescope.exe
+```
+
+**What to explain:**
+
+1. The application opens the supplied source file.
+2. Supported comments are removed while preserving useful source positions.
+3. The tokenizer recognizes supported keywords, identifiers,
+   numbers, operators, punctuation, and literals.
+4. Each token retains information needed by later analysis stages.
+
+### Part D: Phase 2 - Function Bodies and Type-1 Clones
+
+**Development objective:** Recognize supported function bodies
+and detect identical body-level token sequences.
+
+#### D1. Code-region recognition
+
+```powershell
+.\build\regression\code_region_smoke.exe
+```
+
+#### D2. Function-body recognition
+
+```powershell
+.\build\regression\function_region_smoke.exe
+```
+
+#### D3. Type-1 matching
+
+```powershell
+.\build\regression\type1_clone_smoke.exe
+```
+
+#### D4. Complete Type-1 file pipeline
+
+```powershell
+.\build\regression\type1_file_pipeline_smoke.exe
+```
+
+The file-pipeline test displays representative candidate
+source locations and the human-review warning.
+
+#### D5. Analyze the Type-1 fixture
+
+```powershell
+@(".\tests\fixtures\type1", "n") |
+    .\clonescope.exe > .\build\regression\type1_demo.log
+
+Get-Content .\build\regression\type1_demo.log -Tail 65
+```
+
+**What to explain:**
+
+- Function bodies are represented using token-index ranges.
+- Type-1 matching compares token types and lexemes.
+- Supported whitespace and comment differences do not
+  prevent an otherwise exact body-level match.
+- Candidate reports include source-file paths and line ranges.
+
+### Part E: Phase 3 - Type-2 Clone Detection
+
+**Development objective:** Extend matching to function bodies
+with consistent identifier renaming.
+
+#### E1. Type-2 matching tests
+
+```powershell
+.\build\regression\type2_clone_smoke.exe
+```
+
+#### E2. Type-2 reporting tests
+
+```powershell
+.\build\regression\type2_report_smoke.exe
+```
+
+#### E3. Analyze the Type-2 fixture
+
+```powershell
+@(".\tests\fixtures\type2", "n") |
+    .\clonescope.exe > .\build\regression\type2_demo.log
+
+Get-Content .\build\regression\type2_demo.log -Tail 65
+```
+
+**What to explain:**
+
+- Type-2-only matching supports consistent one-to-one
+  identifier renaming.
+- Forward and reverse identifier maps enforce consistency.
+- Non-identifier token lexemes must still match under
+  the implemented rules.
+- Exact Type-1 matches are excluded from the Type-2-only category.
+
+### Part F: Phase 4 - Statistics and Stylometric Analysis
+
+**Development objective:** Add source statistics and historical
+student programming-style comparisons.
+
+#### F1. Source statistics
+
+```powershell
+.\build\regression\source_statistics_smoke.exe
+```
+
+#### F2. Identifier naming styles
+
+```powershell
+.\build\regression\identifier_style_smoke.exe
+```
+
+#### F3. Commenting styles
+
+```powershell
+.\build\regression\comment_style_smoke.exe
+```
+
+#### F4. Historical naming analysis
+
+```powershell
+.\build\regression\identifier_history_smoke.exe
+```
+
+#### F5. Historical commenting analysis
+
+```powershell
+.\build\regression\comment_history_smoke.exe
+```
+
+#### F6. Consolidated analysis reporting
+
+```powershell
+.\build\regression\analysis_report_smoke.exe
+```
+
+#### F7. Human-review indicators
+
+```powershell
+.\build\regression\review_indicators_smoke.exe
+```
+
+**What to explain:**
+
+- Source statistics summarize physical lines, blanks,
+  tokens, and recognized function bodies.
+- Identifier-style analysis classifies naming conventions.
+- Commenting-style analysis examines commenting habits.
+- Historical comparisons require sufficient and stable evidence.
+- Non-evaluable histories are distinguished from histories
+  evaluated with no deviation.
+- Review indicators are not accusations of plagiarism.
+
+### Part G: Phase 5 - CSV and JSON Reporting
+
+**Development objective:** Preserve completed analysis
+results in machine-readable files.
+
+#### G1. CSV escaping
+
+```powershell
+.\build\regression\csv_export_smoke.exe
+```
+
+#### G2. CSV overview serialization
+
+```powershell
+.\build\regression\csv_overview_smoke.exe
+```
+
+#### G3. CSV candidate serialization
+
+```powershell
+.\build\regression\csv_candidates_smoke.exe
+```
+
+#### G4. CSV student findings
+
+```powershell
+.\build\regression\csv_student_findings_smoke.exe
+```
+
+#### G5. JSON string escaping
+
+```powershell
+.\build\regression\json_string_smoke.exe
+```
+
+#### G6. JSON summary serialization
+
+```powershell
+.\build\regression\json_summary_smoke.exe
+```
+
+#### G7. JSON candidate and student records
+
+```powershell
+.\build\regression\json_candidates_smoke.exe
+
+.\build\regression\json_student_findings_smoke.exe
+```
+
+#### G8. Physical report-file export
+
+```powershell
+.\build\regression\report_file_export_smoke.exe
+```
+
+**What to explain:**
+
+- CSV serializers generate tabular records.
+- JSON serializers generate nested structured records.
+- All serializers use the existing `AnalysisReport`.
+- File export creates a fresh `run_N` directory.
+- Four report files are generated for successful
+  directory analyses.
+- Earlier report directories are preserved.
+
+### Part H: Final Complete Integration Demonstration
+
+The final demonstration uses the controlled 22-student dataset.
+
+#### H1. Run the complete analysis
+
+```powershell
+@(".\tests\fixtures\cohort22", "y") |
+    .\clonescope.exe > .\clonescope_integration.log
+
+$LASTEXITCODE
+```
+
+Expected exit code:
+
+```text
+0
+```
+
+#### H2. Display the analysis conclusion
+
+```powershell
+Get-Content .\clonescope_integration.log -Tail 75
+```
+
+#### H3. Locate the newest export directory
+
+```powershell
+$latestRun = Get-ChildItem .\clonescope_reports -Directory |
+    Where-Object { $_.Name -match '^run_\d+$' } |
+    Sort-Object { [int]($_.Name -replace '^run_', '') } -Descending |
+    Select-Object -First 1
+
+$latestRun.FullName
+```
+
+#### H4. Display the generated files
+
+```powershell
+Get-ChildItem $latestRun.FullName -Name
+```
+
+Expected files:
+
+```text
+analysis_overview.csv
+analysis_report.json
+clone_candidates.csv
+student_findings.csv
+```
+
+#### H5. Inspect the JSON report
+
+```powershell
+$report = Get-Content -Raw (
+    Join-Path $latestRun.FullName "analysis_report.json"
+) | ConvertFrom-Json -ErrorAction Stop
+
+$report.summary.dataset_overview | Format-List
+
+$report.summary.clone_detection | Format-List
+
+$report.human_review_indicators.student_count
+```
+
+#### H6. Inspect the CSV output
+
+```powershell
+Import-Csv (
+    Join-Path $latestRun.FullName "analysis_overview.csv"
+) | Format-Table -AutoSize
+```
+
+#### H7. Open the output files in VS Code
+
+```powershell
+code -r (Join-Path $latestRun.FullName "analysis_overview.csv")
+
+code -r (Join-Path $latestRun.FullName "clone_candidates.csv")
+
+code -r (Join-Path $latestRun.FullName "student_findings.csv")
+
+code -r (Join-Path $latestRun.FullName "analysis_report.json")
+```
+
+### Final Verified Cohort Results
+
+| Measurement                           | Result |
+| ------------------------------------- | -----: |
+| Student folders                       |     22 |
+| Source files                          |     66 |
+| Source-file pairs compared            |  2,145 |
+| Type-1 candidate pairs                |     10 |
+| Type-2-only candidate pairs           |     10 |
+| Total candidate pairs                 |     20 |
+| Student finding records               |     22 |
+| Students with human-review indicators |     12 |
+
+These values come from the controlled synthetic cohort.
+
+They verify the behavior of the implemented pipeline on the
+selected fixture, not plagiarism-detection accuracy.
+
+### Recommended Short Viva Sequence
+
+If presentation time is limited, demonstrate the following:
+
+1. Git commit history.
+2. Preprocessor and tokenizer smoke tests.
+3. Type-1 file-pipeline demonstration.
+4. Type-2 matching demonstration.
+5. Historical stylometric analysis tests.
+6. Complete cohort22 analysis.
+7. Generated CSV and JSON reports.
+8. Interpretation warning and current limitations.
+
+The complete chronological demonstration is available above
+if the supervisor requests additional technical evidence.
+
+**Important:** The source files inside the controlled student
+fixtures are independent programs. Do not compile all fixture
+files into one executable because many contain their own
+`main()` functions.
+
+---
 
 ## Implemented Features
 
@@ -208,26 +1187,26 @@ Within each file pair, the system compares combinations of recognized function-b
 
 ## Main Source Components
 
-| File/module             | Responsibility                                                           |
-| ----------------------- | ------------------------------------------------------------------------ |
-| `src/main.cpp`          | Minimal entry point                                                      |
-| `src/application.cpp`   | Input, discovery, pipeline coordination, file-pair comparison and output |
-| `src/preprocessor.*`    | Supported comment removal                                                |
-| `src/tokenizer.*`       | Token construction and source positions                                  |
-| `src/code_region.*`     | Matched brace-region identification                                      |
-| `src/function_region.*` | Restricted function-body recognition                                     |
-| `src/type1_clone.*`     | Exact Type-1 body comparison and discovery                               |
-| `src/type1_report.*`    | Explainable Type-1 candidate reporting                                   |
-| `src/type2_clone.*`     | Consistent identifier mapping and Type-2-only discovery                  |
-| `src/type2_report.*`    | Explainable Type-2-only candidate reporting                              |
-| `src/source_statistics.*` | Original-source lines, blanks, token counts and aggregates             |
-| `src/identifier_style.*` | Unique identifier classification and naming statistics                  |
-| `src/identifier_history.*` | Historical dominant naming-convention comparisons                   |
-| `src/comment_style.*` | Original-versus-cleaned comment-line statistics                          |
-| `src/comment_history.*` | Historical commenting-rate comparisons                                  |
-| `src/assignment_order.*` | Strict filename validation and numeric assignment ordering             |
-| `src/clone_summary.*` | Candidate path and line-range records and deterministic pair display      |
-| `src/analysis_report.*` | Consolidated dataset, clone, stylometry and human-review report         |
+| File/module                | Responsibility                                                           |
+| -------------------------- | ------------------------------------------------------------------------ |
+| `src/main.cpp`             | Minimal entry point                                                      |
+| `src/application.cpp`      | Input, discovery, pipeline coordination, file-pair comparison and output |
+| `src/preprocessor.*`       | Supported comment removal                                                |
+| `src/tokenizer.*`          | Token construction and source positions                                  |
+| `src/code_region.*`        | Matched brace-region identification                                      |
+| `src/function_region.*`    | Restricted function-body recognition                                     |
+| `src/type1_clone.*`        | Exact Type-1 body comparison and discovery                               |
+| `src/type1_report.*`       | Explainable Type-1 candidate reporting                                   |
+| `src/type2_clone.*`        | Consistent identifier mapping and Type-2-only discovery                  |
+| `src/type2_report.*`       | Explainable Type-2-only candidate reporting                              |
+| `src/source_statistics.*`  | Original-source lines, blanks, token counts and aggregates               |
+| `src/identifier_style.*`   | Unique identifier classification and naming statistics                   |
+| `src/identifier_history.*` | Historical dominant naming-convention comparisons                        |
+| `src/comment_style.*`      | Original-versus-cleaned comment-line statistics                          |
+| `src/comment_history.*`    | Historical commenting-rate comparisons                                   |
+| `src/assignment_order.*`   | Strict filename validation and numeric assignment ordering               |
+| `src/clone_summary.*`      | Candidate path and line-range records and deterministic pair display     |
+| `src/analysis_report.*`    | Consolidated dataset, clone, stylometry and human-review report          |
 
 ## Project Development History: From the First File to Phase 4
 
@@ -237,16 +1216,16 @@ phases and how the newer statistical modules reuse that foundation. The phase
 labels describe development milestones; they do **not** imply that every item
 in the supervisor-approved final proposal is already complete.
 
-| Development stage | Implementation added | Why the stage matters now |
-| --- | --- | --- |
-| Initial scaffold | Minimal `main.cpp`, application controller, source-file input and build setup | Provides the one program entry point and interactive workflow |
-| Phase 1: preprocessing | State-driven comment removal with line-break preservation | Supplies comparison-ready text without destroying ordinary string/character literals |
-| Phase 1: tokenization | Typed lexical tokens with exact lexemes, source lines and columns | Creates the representation used by region discovery and clone matching |
-| Phase 2: code/function regions | Matched brace intervals and supported function-body selection | Establishes the body-level unit of analysis |
-| Phase 2: Type-1 | Exact token-sequence matching and source-location reports | Detects supported identical body candidates with explainable evidence |
-| Phase 3: Type-2 | Consistent one-to-one identifier renaming, recursive file discovery and reporting | Extends matching beyond exact identifier spellings without claiming complete Type-2 coverage |
-| Phase 4: statistics/stylometry | Source counters, unique naming styles, comment classification and student history | Adds evidence about the student’s previous programming habits |
-| Phase 4: cohort/report | Numeric assignment ordering, 22-student fixture, detailed pair summary and combined report | Integrates source, clone and stylometric evidence for human review |
+| Development stage              | Implementation added                                                                       | Why the stage matters now                                                                    |
+| ------------------------------ | ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| Initial scaffold               | Minimal `main.cpp`, application controller, source-file input and build setup              | Provides the one program entry point and interactive workflow                                |
+| Phase 1: preprocessing         | State-driven comment removal with line-break preservation                                  | Supplies comparison-ready text without destroying ordinary string/character literals         |
+| Phase 1: tokenization          | Typed lexical tokens with exact lexemes, source lines and columns                          | Creates the representation used by region discovery and clone matching                       |
+| Phase 2: code/function regions | Matched brace intervals and supported function-body selection                              | Establishes the body-level unit of analysis                                                  |
+| Phase 2: Type-1                | Exact token-sequence matching and source-location reports                                  | Detects supported identical body candidates with explainable evidence                        |
+| Phase 3: Type-2                | Consistent one-to-one identifier renaming, recursive file discovery and reporting          | Extends matching beyond exact identifier spellings without claiming complete Type-2 coverage |
+| Phase 4: statistics/stylometry | Source counters, unique naming styles, comment classification and student history          | Adds evidence about the student’s previous programming habits                                |
+| Phase 4: cohort/report         | Numeric assignment ordering, 22-student fixture, detailed pair summary and combined report | Integrates source, clone and stylometric evidence for human review                           |
 
 ### Phase 0 - Repository Scaffold and Interactive Application
 
@@ -292,13 +1271,13 @@ not expand `#include` directives or macros.
 The scanner visits source characters using an index `i` and the following
 `ScanState` values:
 
-| Scanner state | Meaning | Exit or transition condition |
-| --- | --- | --- |
-| `Normal` | Read ordinary source text and detect lexical boundaries | `//` enters LineComment; `/*` enters BlockComment; quotes enter a literal state |
-| `LineComment` | Replace characters belonging to `//` comment text with spaces | An actual newline is preserved and returns to Normal |
-| `BlockComment` | Replace text belonging to `/* ... */` with spaces | Recognized `*/` returns to Normal; newlines remain intact |
-| `StringLiteral` | Copy an ordinary double-quoted string, including basic escapes | Closing `"` ends the literal; physical newline recovers to Normal |
-| `CharLiteral` | Copy an ordinary single-quoted character, including basic escapes | Closing `'` ends the literal; physical newline recovers to Normal |
+| Scanner state   | Meaning                                                           | Exit or transition condition                                                    |
+| --------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `Normal`        | Read ordinary source text and detect lexical boundaries           | `//` enters LineComment; `/*` enters BlockComment; quotes enter a literal state |
+| `LineComment`   | Replace characters belonging to `//` comment text with spaces     | An actual newline is preserved and returns to Normal                            |
+| `BlockComment`  | Replace text belonging to `/* ... */` with spaces                 | Recognized `*/` returns to Normal; newlines remain intact                       |
+| `StringLiteral` | Copy an ordinary double-quoted string, including basic escapes    | Closing `"` ends the literal; physical newline recovers to Normal               |
+| `CharLiteral`   | Copy an ordinary single-quoted character, including basic escapes | Closing `'` ends the literal; physical newline recovers to Normal               |
 
 For example:
 
@@ -321,7 +1300,7 @@ literal text, avoiding a common false-comment error.
 
 **Current limitation:** raw strings, complex line-splicing, macro expansion,
 and the full lexical corner cases of C/C++ remain outside this introductory
-scanner. Its output should be called *comment-cleaned source*, not the result
+scanner. Its output should be called _comment-cleaned source_, not the result
 of a complete compiler preprocessing pass.
 
 **Integration change added later in Phase 4:** comment statistics must be
@@ -339,16 +1318,16 @@ from the cleaned source.
 `std::size_t line`, and `std::size_t column`. The **lexeme** is the exact token
 spelling; the type is the category recognized by this restricted lexer.
 
-| Token category | Example | Current lexer behavior |
-| --- | --- | --- |
-| `Keyword` | `int`, `if`, `return`, `class` | Recognizes a selected built-in set, not every C++ keyword |
-| `Identifier` | `calculateTotal`, `total_sum` | Starts with alphabetic character or underscore, then alphanumeric/underscore |
-| `Number` | `42`, `3.14` | Recognizes decimal integers and a simple optional fractional part |
-| `StringLiteral` | `"hello"` | Handles basic escapes and marks an unterminated ordinary literal Unknown |
-| `CharLiteral` | `'x'` | Handles basic escapes and marks an unterminated ordinary literal Unknown |
-| `Operator` | `+`, `==`, `+=`, `&&`, `->` | Checks supported two-character operators before single-character operators |
-| `Punctuation` | `(`, `)`, `{`, `}`, `;`, `,` | Emits supported structural punctuation |
-| `Unknown` | Unsupported non-whitespace character | Preserved instead of silently discarded |
+| Token category  | Example                              | Current lexer behavior                                                       |
+| --------------- | ------------------------------------ | ---------------------------------------------------------------------------- |
+| `Keyword`       | `int`, `if`, `return`, `class`       | Recognizes a selected built-in set, not every C++ keyword                    |
+| `Identifier`    | `calculateTotal`, `total_sum`        | Starts with alphabetic character or underscore, then alphanumeric/underscore |
+| `Number`        | `42`, `3.14`                         | Recognizes decimal integers and a simple optional fractional part            |
+| `StringLiteral` | `"hello"`                            | Handles basic escapes and marks an unterminated ordinary literal Unknown     |
+| `CharLiteral`   | `'x'`                                | Handles basic escapes and marks an unterminated ordinary literal Unknown     |
+| `Operator`      | `+`, `==`, `+=`, `&&`, `->`          | Checks supported two-character operators before single-character operators   |
+| `Punctuation`   | `(`, `)`, `{`, `}`, `;`, `,`         | Emits supported structural punctuation                                       |
+| `Unknown`       | Unsupported non-whitespace character | Preserved instead of silently discarded                                      |
 
 The tokenizer maintains `index`, `line` and `column` counters. Each token's
 line/column records **where its first character began**, not where it ended.
@@ -442,9 +1421,9 @@ are outside that region; these initial matchers operate on body tokens.
 **Public APIs:**
 
 - `areType1BodyCandidates(firstTokens, firstRegion, secondTokens,
-  secondRegion)` checks one pair of regions.
+secondRegion)` checks one pair of regions.
 - `findType1BodyMatches(firstTokens, firstRegions, secondTokens,
-  secondRegions)` tries all supported body-region combinations for two files.
+secondRegions)` tries all supported body-region combinations for two files.
 - `printType1BodyMatches(...)` formats an explainable candidate report.
 
 Type-1 checks both region boundaries before dereferencing tokens: a region
@@ -490,7 +1469,7 @@ Evidence: identical body token types and lexemes.
 Human review required; similarity is not proof of plagiarism.
 ```
 
-**Interpretation:** this is an exact match under the supported *function-body*
+**Interpretation:** this is an exact match under the supported _function-body_
 tokenization rules. It does not demonstrate that an entire source file or
 program is identical, nor does it prove plagiarism.
 
@@ -559,7 +1538,7 @@ Files: `src/type2_report.hpp` and `src/type2_report.cpp`.
 5. Prints **“Human review required; similarity is not proof of plagiarism.”**
 6. Excludes invalid match records from the reported count and issues a warning.
 
-The current report states the **rule** that was satisfied; it does **not** yet list each identifier mapping, calculate a similarity score, or produce CSV/JSON.
+The Type-2-specific console reporter states the **rule** that was satisfied; it does **not** yet list each identifier mapping or calculate a similarity score. The consolidated analysis results are now exported in CSV and JSON formats through the Phase 5 reporting modules.
 
 ### Application integration
 
@@ -860,16 +1839,16 @@ The fixture includes **injected**, labeled clone relationships:
 
 The actual CloneScope integration run on this fixture produced:
 
-| Measurement | Observed |
-| --- | ---: |
-| Student folders / processed source files | 22 / 66 |
-| Distinct source-file pairs | 2,145 |
-| Original source lines / blank lines | 6,973 / 242 |
-| Tokens / recognized function bodies | 30,995 / 242 |
-| Type-1 / Type-2-only body candidates | 10 / 10 |
-| Naming / commenting deviations | 3 / 3 |
-| Evaluable naming / commenting histories | 21 / 21 of 22 |
-| Students with at least one human-review indicator | 12 |
+| Measurement                                       |      Observed |
+| ------------------------------------------------- | ------------: |
+| Student folders / processed source files          |       22 / 66 |
+| Distinct source-file pairs                        |         2,145 |
+| Original source lines / blank lines               |   6,973 / 242 |
+| Tokens / recognized function bodies               |  30,995 / 242 |
+| Type-1 / Type-2-only body candidates              |       10 / 10 |
+| Naming / commenting deviations                    |         3 / 3 |
+| Evaluable naming / commenting histories           | 21 / 21 of 22 |
+| Students with at least one human-review indicator |            12 |
 
 In the detailed result, Type-1 prime bodies occupy lines **4-29** in the
 injected files. Type-2 Fibonacci bodies occupy lines **34-64** or **32-62**
@@ -905,16 +1884,16 @@ The feature is organized so that per-file statistics, history decisions, clone
 matches, and presentation can be inspected or tested separately. These are
 the **implemented** interfaces, not proposed functions:
 
-| Module | Public types and functions | Output and caller |
-| --- | --- | --- |
-| `source_statistics` | `SourceStatistics`, `AggregateStatistics`; `calculateSourceStatistics(sourceCode, tokenCount, recognizedFunctionBodies)`; `accumulateSourceStatistics(aggregate, fileStats)` | Physical line counts and running totals used by `application.cpp` |
-| `identifier_style` | `IdentifierStyle`; `IdentifierStyleStatistics`; `classifyIdentifierStyle(identifier)`; `calculateIdentifierStyleStatistics(tokens)`; `identifierStyleName(style)` | Per-file distinct identifier styles and printable convention labels |
-| `identifier_history` | `IdentifierHistoryResult`; `analyzeIdentifierHistory(historicalFiles, currentFile)` | Sufficient/stable evidence flags, historical/current convention and review recommendation |
-| `comment_style` | `CommentStyleStatistics`; `calculateCommentStyleStatistics(original, cleaned)` | Comment-containing, comment-only and inline-comment line counts |
-| `comment_history` | `CommentHistorySample`, `CommentHistoryResult`; `analyzeCommentHistory(historicalFiles, currentFile)` | Historical/current comment rates, stability and deviation flags |
-| `assignment_order` | `AssignmentOrderResult`; `determineAssignmentOrder(filenames)` | Validated numeric positions, plus an explicit rejection reason when invalid |
-| `clone_summary` | `CloneCandidateKind`, `CloneSummaryEntry`; `appendCloneSummaryEntry(...)`; `printCloneSummaryDetails(...)` | Actual candidate pairs, source-line ranges and stable display order |
-| `analysis_report` | `StudentStyleFinding`, `AnalysisReport`; `printCombinedAnalysisReport(output, report)` | Final six-section report and deduplicated student review reasons |
+| Module               | Public types and functions                                                                                                                                                   | Output and caller                                                                         |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `source_statistics`  | `SourceStatistics`, `AggregateStatistics`; `calculateSourceStatistics(sourceCode, tokenCount, recognizedFunctionBodies)`; `accumulateSourceStatistics(aggregate, fileStats)` | Physical line counts and running totals used by `application.cpp`                         |
+| `identifier_style`   | `IdentifierStyle`; `IdentifierStyleStatistics`; `classifyIdentifierStyle(identifier)`; `calculateIdentifierStyleStatistics(tokens)`; `identifierStyleName(style)`            | Per-file distinct identifier styles and printable convention labels                       |
+| `identifier_history` | `IdentifierHistoryResult`; `analyzeIdentifierHistory(historicalFiles, currentFile)`                                                                                          | Sufficient/stable evidence flags, historical/current convention and review recommendation |
+| `comment_style`      | `CommentStyleStatistics`; `calculateCommentStyleStatistics(original, cleaned)`                                                                                               | Comment-containing, comment-only and inline-comment line counts                           |
+| `comment_history`    | `CommentHistorySample`, `CommentHistoryResult`; `analyzeCommentHistory(historicalFiles, currentFile)`                                                                        | Historical/current comment rates, stability and deviation flags                           |
+| `assignment_order`   | `AssignmentOrderResult`; `determineAssignmentOrder(filenames)`                                                                                                               | Validated numeric positions, plus an explicit rejection reason when invalid               |
+| `clone_summary`      | `CloneCandidateKind`, `CloneSummaryEntry`; `appendCloneSummaryEntry(...)`; `printCloneSummaryDetails(...)`                                                                   | Actual candidate pairs, source-line ranges and stable display order                       |
+| `analysis_report`    | `StudentStyleFinding`, `AnalysisReport`; `printCombinedAnalysisReport(output, report)`                                                                                       | Final six-section report and deduplicated student review reasons                          |
 
 Internal `.cpp` helpers further separate the algorithms:
 
@@ -964,22 +1943,22 @@ ground-truth files; the counts earlier in this README are the observed program
 results. “None” means no **intentionally injected** clone, not a guarantee
 that other arbitrary software could never find similarity.
 
-| Student(s) | Intended naming history | Intended commenting history | Injected clone group |
-| --- | --- | --- | --- |
-| 01 | camelCase to snake_case (deviation) | Roughly 30% to roughly 30% | Type-1 prime |
-| 02 | Stable snake_case | Roughly 30% to roughly 30% | Type-1 prime |
-| 03, 04 | Stable camelCase | Roughly 30% to roughly 30% | None |
-| 05 | camelCase to snake_case (deviation) | Roughly 30% to 0% (deviation) | Type-2 Fibonacci |
-| 06, 07, 08 | Stable camelCase | Roughly 30% to roughly 30% | None |
-| 09 | PascalCase to snake_case (deviation) | Roughly 30% to 0% (deviation) | None |
-| 10 | Stable camelCase | Roughly 30% to roughly 30% | None |
-| 11, 12, 13, 14 | Stable snake_case | Roughly 30% to roughly 30% | Type-2 Fibonacci |
-| 15 | Historically mixed (not evaluable) | Historically mixed (not evaluable) | None |
-| 16 | Stable camelCase | 0% to 0% | None |
-| 17, 18, 19 | Stable snake_case | Roughly 30% to roughly 30% | Type-1 prime |
-| 20 | Stable camelCase | 0% to roughly 30% (deviation) | None |
-| 21 | Stable camelCase | Roughly 30% to roughly 30% | None |
-| 22 | Stable snake_case | Roughly 30% to roughly 30% | None |
+| Student(s)     | Intended naming history              | Intended commenting history        | Injected clone group |
+| -------------- | ------------------------------------ | ---------------------------------- | -------------------- |
+| 01             | camelCase to snake_case (deviation)  | Roughly 30% to roughly 30%         | Type-1 prime         |
+| 02             | Stable snake_case                    | Roughly 30% to roughly 30%         | Type-1 prime         |
+| 03, 04         | Stable camelCase                     | Roughly 30% to roughly 30%         | None                 |
+| 05             | camelCase to snake_case (deviation)  | Roughly 30% to 0% (deviation)      | Type-2 Fibonacci     |
+| 06, 07, 08     | Stable camelCase                     | Roughly 30% to roughly 30%         | None                 |
+| 09             | PascalCase to snake_case (deviation) | Roughly 30% to 0% (deviation)      | None                 |
+| 10             | Stable camelCase                     | Roughly 30% to roughly 30%         | None                 |
+| 11, 12, 13, 14 | Stable snake_case                    | Roughly 30% to roughly 30%         | Type-2 Fibonacci     |
+| 15             | Historically mixed (not evaluable)   | Historically mixed (not evaluable) | None                 |
+| 16             | Stable camelCase                     | 0% to 0%                           | None                 |
+| 17, 18, 19     | Stable snake_case                    | Roughly 30% to roughly 30%         | Type-1 prime         |
+| 20             | Stable camelCase                     | 0% to roughly 30% (deviation)      | None                 |
+| 21             | Stable camelCase                     | Roughly 30% to roughly 30%         | None                 |
+| 22             | Stable snake_case                    | Roughly 30% to roughly 30%         | None                 |
 
 The 20 expected pairs are stored explicitly in
 `tests/fixtures/cohort22/expected_clone_pairs.csv`; there are 10 combinations
@@ -1160,7 +2139,7 @@ Reported candidates: 1
 - **Output volume:** the program currently prints preprocessed source code and pairwise results to the terminal, which can be unwieldy for large datasets.
 - **Reporting detail:** the Type-2 reporter describes consistent renaming but does not list the actual identifier mapping.
 - **Heuristic stylometry:** basic naming/commenting history is implemented, but it does not analyze semantic programming habits, learn writer profiles, or calculate statistically calibrated authorship probabilities. Insufficient or unstable histories are not evaluable.
-- **No CSV/JSON export yet:** structured export is planned, not implemented.
+- **CSV/JSON export scope:** structured report export is implemented for directory-based analysis. Single-file analysis does not currently generate the complete four-file report bundle. Spreadsheet-formula protection for untrusted fields and transactional rollback after partial export failures remain future improvements.
 - **Scalability is not benchmarked:** the 22-student / 66-file controlled integration test demonstrates functional behavior, not elapsed-time or memory scaling to larger real-world cohorts.
 - **No automated CI configured:** the recorded tests were run locally.
 
@@ -1184,9 +2163,27 @@ assignment ordering, 22-student controlled cohort, consolidated report,
 architecture, source-code walkthroughs and viva preparation, see the
 [Phase 4 Full Technical Learning Manual](docs/learning-notes/CloneScope_Phase4_Full_Technical_Learning_Manual.pdf).
 
-## Midterm-First Development Roadmap
+For the complete Phase 5 implementation, including CSV serialization,
+JSON report generation, shared human-review indicators, filesystem
+export handling, application integration, testing, C++17 concepts,
+limitations, and viva preparation, see the
+[Phase 5 Full Technical Learning Manual](docs/learning-notes/CloneScope_Phase5_CSV_JSON_Export_Full_Technical_Learning_Manual.pdf).
 
-The remaining pre-midterm work is planned in this order:
+## Midterm-First Development Roadmap (Historical Plan)
+
+> **Status update — 8 November 2026:** The statistical-stylometric
+> development branch has been merged into `main`. CSV/JSON report export
+> has been implemented and integration-tested on
+> `feat/csv-json-report-export`. All 28 smoke-test executables passed
+> the final recorded regression. The remaining pre-midterm work is
+> documentation finalization, Pull Request review and merge, and
+> demonstration/viva preparation.
+>
+> The numbered roadmap below is retained as a historical development
+> plan rather than a statement that its earlier implementation tasks
+> are still pending.
+
+The original pre-midterm plan was recorded in this order:
 
 1. **Close the statistical-stylometric feature branch:** review its README,
    manual, source diff and smoke tests; push documentation and merge by Pull Request.

@@ -47,7 +47,9 @@ void printCombinedAnalysisReport(
 {
     std::set<std::string> type1Students;
     std::set<std::string> type2Students;
-    std::map<std::string, std::set<std::string>> reviewReasons;
+
+    const HumanReviewIndicators reviewReasons =
+        collectHumanReviewIndicators(report);
 
     for (const CloneSummaryEntry &candidate : report.cloneCandidates)
     {
@@ -57,17 +59,12 @@ void printCombinedAnalysisReport(
             candidate.kind == CloneCandidateKind::Type1
                 ? type1Students
                 : type2Students;
-        const std::string reason =
-            candidate.kind == CloneCandidateKind::Type1
-                ? "Type-1 body-level candidate"
-                : "Type-2-only body-level candidate";
 
         for (const std::string &student : {first, second})
         {
             if (!student.empty())
             {
                 participants.insert(student);
-                reviewReasons[student].insert(reason);
             }
         }
     }
@@ -90,8 +87,6 @@ void printCombinedAnalysisReport(
             {
                 ++namingCount;
                 namingStudents.insert(finding.studentId);
-                reviewReasons[finding.studentId].insert(
-                    "Historical naming-style deviation");
             }
         }
         else
@@ -102,12 +97,11 @@ void printCombinedAnalysisReport(
         if (finding.commentingEvaluated)
         {
             ++commentingEvaluable;
+
             if (finding.commentingDeviation)
             {
                 ++commentingCount;
                 commentingStudents.insert(finding.studentId);
-                reviewReasons[finding.studentId].insert(
-                    "Historical commenting-style deviation");
             }
         }
         else
@@ -142,7 +136,8 @@ void printCombinedAnalysisReport(
            << report.aggregate.type2OnlyCandidateCount << '\n'
            << "Total body-level candidates: "
            << report.aggregate.type1CandidateCount +
-                  report.aggregate.type2OnlyCandidateCount << '\n';
+                  report.aggregate.type2OnlyCandidateCount
+           << '\n';
 
     output << "Students involved in Type-1 candidates: ";
     printStudentList(output, type1Students);
@@ -200,4 +195,51 @@ void printCombinedAnalysisReport(
            << "====================================================\n"
            << "                 ANALYSIS COMPLETE\n"
            << "====================================================\n";
+}
+
+HumanReviewIndicators collectHumanReviewIndicators(
+    const AnalysisReport &report)
+{
+    HumanReviewIndicators indicators;
+
+    for (const CloneSummaryEntry &candidate : report.cloneCandidates)
+    {
+        const std::string reason =
+            candidate.kind == CloneCandidateKind::Type1
+                ? "Type-1 body-level candidate"
+                : "Type-2-only body-level candidate";
+
+        const std::string firstStudent =
+            studentFromPath(candidate.firstPath);
+
+        const std::string secondStudent =
+            studentFromPath(candidate.secondPath);
+
+        if (!firstStudent.empty())
+        {
+            indicators[firstStudent].insert(reason);
+        }
+
+        if (!secondStudent.empty())
+        {
+            indicators[secondStudent].insert(reason);
+        }
+    }
+
+    for (const StudentStyleFinding &finding : report.studentFindings)
+    {
+        if (finding.namingEvaluated && finding.namingDeviation)
+        {
+            indicators[finding.studentId].insert(
+                "Historical naming-style deviation");
+        }
+
+        if (finding.commentingEvaluated && finding.commentingDeviation)
+        {
+            indicators[finding.studentId].insert(
+                "Historical commenting-style deviation");
+        }
+    }
+
+    return indicators;
 }
